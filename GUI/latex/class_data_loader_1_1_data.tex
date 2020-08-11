@@ -1,0 +1,174 @@
+\hypertarget{class_data_loader_1_1_data}{}\doxysection{Data\+Loader.\+Data Class Reference}
+\label{class_data_loader_1_1_data}\index{DataLoader.Data@{DataLoader.Data}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_af0faf89e8877ab85651081c272cd2a5d}{\+\_\+\+\_\+init\+\_\+\+\_\+}} (self, root\+Dir=\textquotesingle{}.\textquotesingle{})
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_af9bcbe187f9d482006868ae8550669be}{get\+New\+C\+S\+V\+Files}} (self)
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_abe56b9359a89c463148a419d10597a3a}{update\+Metadata}} (self)
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_a6780fecacf9a6aae148ca8f491a2219c}{get\+Timestamp\+Range}} (self)
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_a6d4133c1357ab83e8f76bca4ece46fa8}{select\+C\+S\+V\+Files}} (self, range)
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_aa77482e144fb8eeb51bfb56223bd25b0}{get\+All\+C\+S\+V\+Files}} (self)
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_aff32440eec1bae1540f447f2c81426a8}{get\+Headers}} (self, file)
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_a89aa432b106b284982b7bdbc5d65b460}{gen\+Dt}} (self)
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_a8ddd8502f57ac521ece2d05e60480112}{load}} (self, time\+Range=\mbox{[}$\,$\mbox{]})
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_a4d9ebce903d83464013314f90a92fbe1}{get\+Column\+Count}} (self)
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_acebeca8d0b203ed3216fd5e4919fa808}{get\+Line\+Count}} (self)
+\item 
+def \mbox{\hyperlink{class_data_loader_1_1_data_a58e059365894e452f7f5813fe1433bef}{print}} (self)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_data_loader_1_1_data_a0367a2369a640893ebf67fad06389ff4}\label{class_data_loader_1_1_data_a0367a2369a640893ebf67fad06389ff4}} 
+{\bfseries table}
+\item 
+\mbox{\Hypertarget{class_data_loader_1_1_data_ab89dee90935a67bc5f425f0f1cbba1ff}\label{class_data_loader_1_1_data_ab89dee90935a67bc5f425f0f1cbba1ff}} 
+{\bfseries headers}
+\item 
+\mbox{\Hypertarget{class_data_loader_1_1_data_a720e2b14774e6d696015f6959601dd4e}\label{class_data_loader_1_1_data_a720e2b14774e6d696015f6959601dd4e}} 
+{\bfseries root\+Dir}
+\item 
+\mbox{\Hypertarget{class_data_loader_1_1_data_a45f1eed0f89ecb8fc77070af64264641}\label{class_data_loader_1_1_data_a45f1eed0f89ecb8fc77070af64264641}} 
+{\bfseries metadata}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Class to perform selection of data according to user start/end
+datetime and to store selected data
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_data_loader_1_1_data_af0faf89e8877ab85651081c272cd2a5d}\label{class_data_loader_1_1_data_af0faf89e8877ab85651081c272cd2a5d}} 
+\index{DataLoader.Data@{DataLoader.Data}!\_\_init\_\_@{\_\_init\_\_}}
+\index{\_\_init\_\_@{\_\_init\_\_}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{\_\_init\_\_()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{root\+Dir = {\ttfamily \textquotesingle{}.\textquotesingle{}} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}table - contains current data selection in numpy array
+headers - stores list of column headers
+rootDir - root directory where all CSV files to find
+metadata - list of Metadata class objects, each object describing one CSV file
+
+on init all metadata is collected by default
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_data_loader_1_1_data_a89aa432b106b284982b7bdbc5d65b460}\label{class_data_loader_1_1_data_a89aa432b106b284982b7bdbc5d65b460}} 
+\index{DataLoader.Data@{DataLoader.Data}!genDt@{genDt}}
+\index{genDt@{genDt}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{genDt()}{genDt()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+gen\+Dt (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Generate datatype (dt) specifiers for columns
+it is assumed that column wich header includes word "time" has type datetime64
+other columns are assumed to be f4 floats
+\end{DoxyVerb}
+ \mbox{\Hypertarget{class_data_loader_1_1_data_aa77482e144fb8eeb51bfb56223bd25b0}\label{class_data_loader_1_1_data_aa77482e144fb8eeb51bfb56223bd25b0}} 
+\index{DataLoader.Data@{DataLoader.Data}!getAllCSVFiles@{getAllCSVFiles}}
+\index{getAllCSVFiles@{getAllCSVFiles}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{getAllCSVFiles()}{getAllCSVFiles()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+get\+All\+C\+S\+V\+Files (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Get list of all CSV files\end{DoxyVerb}
+ \mbox{\Hypertarget{class_data_loader_1_1_data_a4d9ebce903d83464013314f90a92fbe1}\label{class_data_loader_1_1_data_a4d9ebce903d83464013314f90a92fbe1}} 
+\index{DataLoader.Data@{DataLoader.Data}!getColumnCount@{getColumnCount}}
+\index{getColumnCount@{getColumnCount}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{getColumnCount()}{getColumnCount()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+get\+Column\+Count (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}get column count in current data selection
+
+currently 0th CSV file is used ti retrieve headers, 
+assuming all other files have the same structure
+\end{DoxyVerb}
+ \mbox{\Hypertarget{class_data_loader_1_1_data_aff32440eec1bae1540f447f2c81426a8}\label{class_data_loader_1_1_data_aff32440eec1bae1540f447f2c81426a8}} 
+\index{DataLoader.Data@{DataLoader.Data}!getHeaders@{getHeaders}}
+\index{getHeaders@{getHeaders}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{getHeaders()}{getHeaders()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+get\+Headers (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{file }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Get list of column headers by CSV file specified
+\end{DoxyVerb}
+ \mbox{\Hypertarget{class_data_loader_1_1_data_acebeca8d0b203ed3216fd5e4919fa808}\label{class_data_loader_1_1_data_acebeca8d0b203ed3216fd5e4919fa808}} 
+\index{DataLoader.Data@{DataLoader.Data}!getLineCount@{getLineCount}}
+\index{getLineCount@{getLineCount}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{getLineCount()}{getLineCount()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+get\+Line\+Count (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}get line count in current data selection
+
+currently 0th CSV file is used ti retrieve headers, 
+assuming all other files have the same structure
+\end{DoxyVerb}
+ \mbox{\Hypertarget{class_data_loader_1_1_data_af9bcbe187f9d482006868ae8550669be}\label{class_data_loader_1_1_data_af9bcbe187f9d482006868ae8550669be}} 
+\index{DataLoader.Data@{DataLoader.Data}!getNewCSVFiles@{getNewCSVFiles}}
+\index{getNewCSVFiles@{getNewCSVFiles}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{getNewCSVFiles()}{getNewCSVFiles()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+get\+New\+C\+S\+V\+Files (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Get newly appeared CSV files\end{DoxyVerb}
+ \mbox{\Hypertarget{class_data_loader_1_1_data_a6780fecacf9a6aae148ca8f491a2219c}\label{class_data_loader_1_1_data_a6780fecacf9a6aae148ca8f491a2219c}} 
+\index{DataLoader.Data@{DataLoader.Data}!getTimestampRange@{getTimestampRange}}
+\index{getTimestampRange@{getTimestampRange}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{getTimestampRange()}{getTimestampRange()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+get\+Timestamp\+Range (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Get timestamp range (min/max) based on current CSV files on
+time of launch
+\end{DoxyVerb}
+ \mbox{\Hypertarget{class_data_loader_1_1_data_a8ddd8502f57ac521ece2d05e60480112}\label{class_data_loader_1_1_data_a8ddd8502f57ac521ece2d05e60480112}} 
+\index{DataLoader.Data@{DataLoader.Data}!load@{load}}
+\index{load@{load}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{load()}{load()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+load (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{time\+Range = {\ttfamily \mbox{[}\mbox{]}} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Perform data loading from selected CSV files according to 
+specified time range and converting to numpy array
+
+if no time range is specified, all data possible is loaded
+
+in case of any errors message string is returned; on success empty srtring ""
+is returned
+\end{DoxyVerb}
+ \mbox{\Hypertarget{class_data_loader_1_1_data_a58e059365894e452f7f5813fe1433bef}\label{class_data_loader_1_1_data_a58e059365894e452f7f5813fe1433bef}} 
+\index{DataLoader.Data@{DataLoader.Data}!print@{print}}
+\index{print@{print}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{print()}{print()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+print (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}print currently selected data for debug  purposes\end{DoxyVerb}
+ \mbox{\Hypertarget{class_data_loader_1_1_data_a6d4133c1357ab83e8f76bca4ece46fa8}\label{class_data_loader_1_1_data_a6d4133c1357ab83e8f76bca4ece46fa8}} 
+\index{DataLoader.Data@{DataLoader.Data}!selectCSVFiles@{selectCSVFiles}}
+\index{selectCSVFiles@{selectCSVFiles}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{selectCSVFiles()}{selectCSVFiles()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+select\+C\+S\+V\+Files (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{range }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Select all CSV files which correspond to specified
+time range
+\end{DoxyVerb}
+ \mbox{\Hypertarget{class_data_loader_1_1_data_abe56b9359a89c463148a419d10597a3a}\label{class_data_loader_1_1_data_abe56b9359a89c463148a419d10597a3a}} 
+\index{DataLoader.Data@{DataLoader.Data}!updateMetadata@{updateMetadata}}
+\index{updateMetadata@{updateMetadata}!DataLoader.Data@{DataLoader.Data}}
+\doxysubsubsection{\texorpdfstring{updateMetadata()}{updateMetadata()}}
+{\footnotesize\ttfamily def Data\+Loader.\+Data.\+update\+Metadata (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Update list of metdata with information about new files\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+Data\+Loader.\+py\end{DoxyCompactItemize}

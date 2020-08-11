@@ -1,0 +1,208 @@
+.TH "DataLoader.Data" 3 "Wed Aug 5 2020" "datalogger-GUI" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+DataLoader.Data
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, rootDir='\&.')"
+.br
+.ti -1c
+.RI "def \fBgetNewCSVFiles\fP (self)"
+.br
+.ti -1c
+.RI "def \fBupdateMetadata\fP (self)"
+.br
+.ti -1c
+.RI "def \fBgetTimestampRange\fP (self)"
+.br
+.ti -1c
+.RI "def \fBselectCSVFiles\fP (self, range)"
+.br
+.ti -1c
+.RI "def \fBgetAllCSVFiles\fP (self)"
+.br
+.ti -1c
+.RI "def \fBgetHeaders\fP (self, file)"
+.br
+.ti -1c
+.RI "def \fBgenDt\fP (self)"
+.br
+.ti -1c
+.RI "def \fBload\fP (self, timeRange=[])"
+.br
+.ti -1c
+.RI "def \fBgetColumnCount\fP (self)"
+.br
+.ti -1c
+.RI "def \fBgetLineCount\fP (self)"
+.br
+.ti -1c
+.RI "def \fBprint\fP (self)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBtable\fP"
+.br
+.ti -1c
+.RI "\fBheaders\fP"
+.br
+.ti -1c
+.RI "\fBrootDir\fP"
+.br
+.ti -1c
+.RI "\fBmetadata\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Class to perform selection of data according to user start/end
+datetime and to store selected data
+
+.fi
+.PP
+ 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def DataLoader\&.Data\&.__init__ ( self,  rootDir = \fC'\&.'\fP)"
+
+.PP
+.nf
+table - contains current data selection in numpy array
+headers - stores list of column headers
+rootDir - root directory where all CSV files to find
+metadata - list of Metadata class objects, each object describing one CSV file
+
+on init all metadata is collected by default
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def DataLoader\&.Data\&.genDt ( self)"
+
+.PP
+.nf
+Generate datatype (dt) specifiers for columns
+it is assumed that column wich header includes word "time" has type datetime64
+other columns are assumed to be f4 floats
+
+.fi
+.PP
+ 
+.SS "def DataLoader\&.Data\&.getAllCSVFiles ( self)"
+
+.PP
+.nf
+Get list of all CSV files
+.fi
+.PP
+ 
+.SS "def DataLoader\&.Data\&.getColumnCount ( self)"
+
+.PP
+.nf
+get column count in current data selection
+
+currently 0th CSV file is used ti retrieve headers, 
+assuming all other files have the same structure
+
+.fi
+.PP
+ 
+.SS "def DataLoader\&.Data\&.getHeaders ( self,  file)"
+
+.PP
+.nf
+Get list of column headers by CSV file specified
+
+.fi
+.PP
+ 
+.SS "def DataLoader\&.Data\&.getLineCount ( self)"
+
+.PP
+.nf
+get line count in current data selection
+
+currently 0th CSV file is used ti retrieve headers, 
+assuming all other files have the same structure
+
+.fi
+.PP
+ 
+.SS "def DataLoader\&.Data\&.getNewCSVFiles ( self)"
+
+.PP
+.nf
+Get newly appeared CSV files
+.fi
+.PP
+ 
+.SS "def DataLoader\&.Data\&.getTimestampRange ( self)"
+
+.PP
+.nf
+Get timestamp range (min/max) based on current CSV files on
+time of launch
+
+.fi
+.PP
+ 
+.SS "def DataLoader\&.Data\&.load ( self,  timeRange = \fC[]\fP)"
+
+.PP
+.nf
+Perform data loading from selected CSV files according to 
+specified time range and converting to numpy array
+
+if no time range is specified, all data possible is loaded
+
+in case of any errors message string is returned; on success empty srtring ""
+is returned
+
+.fi
+.PP
+ 
+.SS "def DataLoader\&.Data\&.print ( self)"
+
+.PP
+.nf
+print currently selected data for debug  purposes
+.fi
+.PP
+ 
+.SS "def DataLoader\&.Data\&.selectCSVFiles ( self,  range)"
+
+.PP
+.nf
+Select all CSV files which correspond to specified
+time range
+
+.fi
+.PP
+ 
+.SS "def DataLoader\&.Data\&.updateMetadata ( self)"
+
+.PP
+.nf
+Update list of metdata with information about new files
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for datalogger-GUI from the source code\&.
