@@ -45,7 +45,7 @@ def genData():
 	return retVal
 	
 def genLine():
-	return "%s%s\r\n" % (genTimestamp(), genData())
+	return "%s%s" % (genTimestamp(), genData())
 
 if __name__ == "__main__":
 	global conn, s
