@@ -2,6 +2,7 @@ from datetime import datetime
 import configparser
 
 ROOT_DIR = "C:\\Users\\arturs\\Desktop\\datalogger\\GUI\csv\\"
+HEADERS = ["time", "sensor0", "sensor1", "sensor2", "sensor3"] #TEMP!!!!
 
 class Csv:
 	"""Class to perform actions with CSV files"""
@@ -13,6 +14,7 @@ class Csv:
 		self.lineCount = 0
 		
 		self.genPath()
+		self.putHeaders(HEADERS)
 		self.createMeta()
 		
 	def store(self, lines):
@@ -28,6 +30,7 @@ class Csv:
 			# mark previous meta file as completed nefore creating the new one
 			self.markMetaCompleted()
 			self.genPath()
+			self.putHeaders(HEADERS)
 			self.createMeta(start = lines[0].split(",")[0])
 			
 		with open(self.csvPath, 'a') as f:
@@ -58,7 +61,7 @@ class Csv:
 		if no start info is provided, current system time is taken
 		"""
 		if start == "":
-			start = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+			start = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 		self.meta = configparser.ConfigParser()
 		self.meta.add_section('meta')
 		self.meta['meta']['start'] = start
@@ -77,3 +80,13 @@ class Csv:
 		"""
 		self.meta['meta']['completed'] = "yes"
 		self.writeMeta()
+		
+	def putHeaders(self, headerList):
+		headerString = ""
+		for i in range(0, len(headerList)):
+			headerString += headerList[i]
+			if i != len(headerList)-1:
+				headerString += ","
+			
+		with open(self.csvPath, 'w') as f:
+			f.write(headerString+"\r")

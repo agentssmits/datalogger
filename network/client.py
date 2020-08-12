@@ -38,6 +38,8 @@ if __name__ == "__main__":
 	signal(SIGINT, gracefulStopHandler)
 	
 	csv = Csv()
+	
+	dataBuffer = []
 	while True:
 		try:
 			with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -48,7 +50,11 @@ if __name__ == "__main__":
 					if "stop" in data:
 						gracefulStop(terminate = True)
 						
-					csv.store([data])
+					dataBuffer.append(data)
+					if len(dataBuffer) > 10:
+						csv.store(dataBuffer)
+						dataBuffer = []
+						
 					time.sleep(0.1)
 		except Exception as e:
 			printErr(e)

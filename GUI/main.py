@@ -11,6 +11,7 @@ from functools import partial
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import pandas as pd
 
 import matplotlib as mpl
 
@@ -84,26 +85,33 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.showMaximized()
 		
 	def plotData(self):
-		global colours, points
-		genPointStyles(self.data.getColumnCount())
-		
-		series = self.data.headers
-		time = self.data.table[series[0]]
-		grid = getGridSize(self.data.getColumnCount()-1)
-		for i in range (1, self.data.getColumnCount()):
-			self.widget.canvas.setLayout(grid+str(i))
-			self.widget.canvas.ax.scatter(time, 
-									self.data.table[series[i]],
-									c = next(colours),
-									marker = next(points))
-			self.widget.canvas.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
-			self.widget.canvas.fig.autofmt_xdate()  
-			self.widget.canvas.ax.set_xlabel (series[0], fontsize=10)
-			self.widget.canvas.ax.set_ylabel (series[i], fontsize= 10)
-			self.widget.canvas.ax.autoscale(enable=True, axis='both', tight=None)
-		self.widget.canvas.draw()
-
-		
+		try:
+			global colours, points
+			genPointStyles(self.data.getColumnCount())
+			
+			series = self.data.headers
+			time = self.data.table[series[0]]
+			
+			grid = getGridSize(self.data.getColumnCount()-1)
+			for i in range (1, self.data.getColumnCount()):
+				self.widget.canvas.setLayout(grid+str(i))
+				
+				self.widget.canvas.ax.scatter(time, 
+										self.data.table[series[i]],
+										c = next(colours),
+										marker = next(points))
+				self.widget.canvas.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
+				self.widget.canvas.fig.autofmt_xdate()  
+				self.widget.canvas.ax.set_xlabel (series[0], fontsize=10)
+				self.widget.canvas.ax.set_ylabel (series[i], fontsize= 10)
+				self.widget.canvas.ax.autoscale(enable=True, axis='both', tight=None)
+			self.widget.canvas.draw()
+		except Exception as e:
+			print(e)
+			log.warning("Len of time series: %d" % (len(time)))
+			for i in range (1, self.data.getColumnCount()):
+				log.warning("Len of %d series: %d" % (i, len(time)))
+				
 	def onStartDateTimeClicked(self):
 		self.startDateTimePicker.show()		
 	
@@ -139,7 +147,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		while self.onlineModeCheckBox.checkState() == 2:
 			time.sleep(1)
 			if self.data.newData == True:
+				self.widget.canvas.cla()
 				self.plotData()
+				series = self.data.headers
+				endTime = self.data.table[series[0]][-1]
+				ts = pd.to_datetime(str(endTime)) 
+				d = ts.strftime("%Y-%m-%d %H:%M:%S")
+				self.endDateTimeButton.setText(d)
+				self.endDateTimePicker.dateTimeEdit.setDateTime(QDateTime.fromString(d, "%Y-%m-%d %H:%M:%S"))
 				self.data.newData = False
 
 if __name__ == "__main__":

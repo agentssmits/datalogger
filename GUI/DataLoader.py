@@ -29,7 +29,7 @@ class Metadata:
 		self.start.append(start)
 		self.end.append(end)
 		
-		if completed == False:
+		if completed == False and path.replace(".csv", ".meta") not in self.incompleted:
 			if path.endswith(".csv"):
 				path = path.replace(".csv", ".meta")
 			self.incompleted.append(path)
@@ -77,7 +77,7 @@ class Data:
 		self.updateMetadata()	
 		
 		# launch thread periodically checking CSV files marked as incompleted to update end time
-		metaMonitoringThread = threading.Thread(target=self.__checkIncompletedThread)
+		metaMonitoringThread = threading.Thread(target=self.__checkMetaFiles)
 		metaMonitoringThread.daemon = True
 		metaMonitoringThread.start()
 
@@ -89,7 +89,7 @@ class Data:
 				if file.endswith(".meta"):
 					meta = os.path.join(root, file)
 					retVal.append(meta)
-					log.debug("Found %s" % meta)
+					#log.debug("Found %s" % meta)
 					
 		if retVal == []:
 			log.error("No meta files found in %s!" % (self.rootDir))
@@ -100,7 +100,7 @@ class Data:
 		"""Update metdata with information about new files"""
 		
 		for metaFile in self.getAllMetaFiles():
-			if metaFile not in self.metadata.path:
+			if metaFile.replace(".meta",".csv") not in self.metadata.path:
 				try:
 					start = end = ""
 					meta = configparser.ConfigParser()
@@ -111,6 +111,7 @@ class Data:
 					# if start and end times ar ok, append them to metadata array
 					if start != "" and end != "":
 						self.metadata.append(metaFile.replace(".meta", ".csv"), start, end, completed = completed)
+						log.debug("New meta file: %s" % (metaFile))
 				except Exception as e:
 					log.warning("Failed to get end time form %s, exception: %s" % (metaFile, str(e)))
 					
@@ -129,15 +130,18 @@ class Data:
 				self.metadata.removeFromInclompleted(metaFile)
 				log.debug("Metafile %s marked as completed" % (metaFile))
 				
-	def __checkIncompletedThread(self):
+	def __checkMetaFiles(self):
 		while 1:
-			time.sleep(10)
+			time.sleep(1)
 			try:
 				self.checkIncompleted()
 			except Exception as e:
 				log.warning("Checking incompleted files failed for reason: %s", str(e))
-			
-		
+				
+			try:
+				self.updateMetadata()
+			except:
+				log.warning("Updating meta failed for reason: %s", str(e))
 				
 	def getTimestampRange(self):
 		"""
@@ -256,7 +260,6 @@ class Data:
 	
 	def setOnlineMode(self, mode):
 		self.onlineMode = mode
-		print(mode)
 		if mode == True:
 			self.onlineThread = threading.Thread(target=self.__loadThread)
 			self.onlineThread.daemon = True
