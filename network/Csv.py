@@ -1,8 +1,11 @@
 from datetime import datetime
 import configparser
+from filelock import Timeout, FileLock
 
 ROOT_DIR = "C:\\Users\\arturs\\Desktop\\datalogger\\GUI\csv\\"
-HEADERS = ["time", "sensor0", "sensor1", "sensor2", "sensor3"] #TEMP!!!!
+HEADERS = ["time", "sensor0", "sensor1", "sensor2", "sensor3", "sensor4", "sensor5", "sensor6", "sensor7", "sensor8", "sensor9"] #TEMP!!!!
+CSV_LOCK_FILE = ROOT_DIR+"csv.lock"
+META_LOCK_FILE = ROOT_DIR+"meta.lock"
 
 class Csv:
 	"""Class to perform actions with CSV files"""
@@ -12,11 +15,13 @@ class Csv:
 		.csv and .meta files based on current system datetime
 		"""
 		self.lineCount = 0
+		self.metaLock = FileLock(META_LOCK_FILE)
+		self.csvLock = FileLock(CSV_LOCK_FILE)
 		
 		self.genPath()
 		self.putHeaders(HEADERS)
 		self.createMeta()
-		
+
 	def store(self, lines):
 		"""
 		Append CSV file with new lines and update meta info
@@ -25,7 +30,7 @@ class Csv:
 		
 		argument data is supposed to be list of line strings
 		"""
-		if self.lineCount > 300:
+		if self.lineCount > 3000:
 			self.lineCount = 0
 			# mark previous meta file as completed nefore creating the new one
 			self.markMetaCompleted()
@@ -33,10 +38,12 @@ class Csv:
 			self.putHeaders(HEADERS)
 			self.createMeta(start = lines[0].split(",")[0])
 			
-		with open(self.csvPath, 'a') as f:
-			for line in lines:
-				f.write(line+"\n")
-				self.lineCount += 1
+		with self.csvLock:
+			with open(self.csvPath, 'a', newline='') as f:
+				for line in lines:
+					print('Will write %s' % line, end ="")
+					f.write(line)
+					self.lineCount += 1
 		
 		self.updateMetaEnd(lines[-1].split(",")[0])
 	
@@ -52,8 +59,9 @@ class Csv:
 		
 	def writeMeta(self):
 		"""Write current metadata to file"""
-		with open(self.metaPath, 'w') as f:
-			self.meta.write(f)
+		with self.metaLock:
+			with open(self.metaPath, 'w') as f:
+				self.meta.write(f)
 	
 	def createMeta(self, start = ""):
 		"""
@@ -61,7 +69,7 @@ class Csv:
 		if no start info is provided, current system time is taken
 		"""
 		if start == "":
-			start = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+			start = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 		self.meta = configparser.ConfigParser()
 		self.meta.add_section('meta')
 		self.meta['meta']['start'] = start
@@ -87,6 +95,7 @@ class Csv:
 			headerString += headerList[i]
 			if i != len(headerList)-1:
 				headerString += ","
-			
-		with open(self.csvPath, 'w') as f:
-			f.write(headerString+"\r")
+		
+		with self.csvLock:
+			with open(self.csvPath, 'w', newline='') as f:
+				f.write(headerString+"\r\n")

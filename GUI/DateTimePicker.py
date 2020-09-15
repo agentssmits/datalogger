@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import QTime
+from PyQt5.QtCore import QTime, QDateTime
 from functools import partial
 
 
@@ -15,8 +15,8 @@ class DateTimePicker(QtWidgets.QMainWindow, Ui_DateTimePicker):
 			self.calendarWidget.setSelectedDate(defaultDateTime.date())
 			self.dateTimeEdit.setTime(defaultDateTime.time())
 			
-		self.updateDatetime()
-		self.calendarWidget.clicked[QtCore.QDate].connect(self.updateDatetime)
+		self.updateDate()
+		self.calendarWidget.clicked[QtCore.QDate].connect(self.updateDate)
 		
 		win = self.scrollArea.window()
 		timeButtons = win.findChildren(QtWidgets.QPushButton)
@@ -25,7 +25,7 @@ class DateTimePicker(QtWidgets.QMainWindow, Ui_DateTimePicker):
 			time = QTime(int(timeString[0]), int(timeString[1]))
 			b.clicked.connect(partial(self.updateTime, time))
 		
-	def updateDatetime(self):
+	def updateDate(self):
 		date = self.calendarWidget.selectedDate()
 		self.dateTimeEdit.setDate(date)
 		
@@ -38,3 +38,6 @@ class DateTimePicker(QtWidgets.QMainWindow, Ui_DateTimePicker):
 		
 	def passDateTime(self):
 		self.button.setText(self.dateTimeEdit.dateTime().toString("yyyy.MM.dd hh:mm"))
+		
+	def updateDateTime(self, string):
+		self.dateTimeEdit.setDateTime(QDateTime.fromString(string, "yyyy-MM-dd HH:mm:ss"))

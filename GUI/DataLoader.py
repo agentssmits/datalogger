@@ -1,14 +1,19 @@
 import os
+import sys
 import logging as log
 import numpy as np
 import pandas as pd
 import configparser
 import threading
 import time
+from filelock import Timeout, FileLock
 
 from datetime import datetime
 
-DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
+ROOT_DIR = "C:\\Users\\arturs\\Desktop\\datalogger\\GUI\csv\\"
+CSV_LOCK_FILE = ROOT_DIR+"csv.lock"
+META_LOCK_FILE = ROOT_DIR+"meta.lock"
 
 class Metadata:
 	"""Class to store basic metadata of CSV files"""
@@ -17,6 +22,7 @@ class Metadata:
 		The constructor; path, start & end are lists with the same size
 		and store corresponding metadata
 		"""
+	
 		self.path = []
 		self.start = []
 		self.end = []
@@ -67,6 +73,9 @@ class Data:
 		
 		on init all metadata is collected by default
 		"""
+		self.metaLock = FileLock(META_LOCK_FILE)
+		self.csvLock = FileLock(CSV_LOCK_FILE)
+		
 		self.table = []
 		self.prevTable = []
 		self.headers = []
@@ -89,11 +98,10 @@ class Data:
 				if file.endswith(".meta"):
 					meta = os.path.join(root, file)
 					retVal.append(meta)
-					#log.debug("Found %s" % meta)
 					
 		if retVal == []:
-			log.error("No meta files found in %s!" % (self.rootDir))
-			sys.exit()
+			log.warning("No meta files found in %s!" % (self.rootDir))
+
 		return retVal
 		
 	def updateMetadata(self):
@@ -104,7 +112,8 @@ class Data:
 				try:
 					start = end = ""
 					meta = configparser.ConfigParser()
-					meta.read(metaFile)
+					with self.metaLock:
+						meta.read(metaFile)
 					start = datetime.strptime(meta["meta"]["start"], DATETIME_FORMAT)
 					end = datetime.strptime(meta["meta"]["end"], DATETIME_FORMAT)
 					completed = meta["meta"].getboolean("completed")
@@ -113,12 +122,13 @@ class Data:
 						self.metadata.append(metaFile.replace(".meta", ".csv"), start, end, completed = completed)
 						log.debug("New meta file: %s" % (metaFile))
 				except Exception as e:
-					log.warning("Failed to get end time form %s, exception: %s" % (metaFile, str(e)))
+					log.warning("Failed to get time form %s, exception: %s" % (metaFile, str(e)))
 					
 	def checkIncompleted(self):
 		for metaFile in self.metadata.getIncompleted():
 			meta = configparser.ConfigParser()
-			meta.read(metaFile)
+			with self.metaLock:
+				meta.read(metaFile)
 			end = datetime.strptime(meta["meta"]["end"], DATETIME_FORMAT)
 			completed = meta["meta"].getboolean("completed")
 			
@@ -148,7 +158,10 @@ class Data:
 		Get timestamp range (min/max) based on current CSV files on
 		time of launch
 		"""
-		return [min(self.metadata.start), max(self.metadata.end)]
+		try:
+			return [min(self.metadata.start), max(self.metadata.end)]
+		except:
+			return [datetime.now(), datetime.now()]
 				
 		
 	def selectCSVFiles(self, timeRange):
@@ -169,8 +182,9 @@ class Data:
 		"""
 		Get list of column headers by CSV file specified
 		"""
-		with open(file, 'r') as f:
-			self.headers = f.readline().rstrip().split(',')
+		with self.csvLock:
+			with open(file, 'r') as f:
+				self.headers = f.readline().rstrip().split(',')
 			
 	def __genDt(self):
 		"""
@@ -198,24 +212,31 @@ class Data:
 		is returned
 		"""
 		
+		# do not load new data if previous is not ploted
+		if self.newData and self.onlineMode:
+			return ""
+			
+		self.lastStartDateTime = timeRange[0]
+		
 		if timeRange == []:
 			fileList = self.getAllCSVFiles(self.rootDir)
 		else:
 			fileList = self.selectCSVFiles(timeRange)
 			
 		if fileList == []:
-			msg = "No CSV files corresponf to selected time range %s : %s" % (timeRange[0].toString("yyyy-MM-ddThh:mm:ss"), timeRange[1].toString("yyyy-MM-ddThh:mm:ss"))
+			#msg = "No CSV files corresponf to selected time range %s : %s" % (timeRange[0].toString("yyyy-MM-ddThh:mm:ss"), timeRange[1].toString("yyyy-MM-ddThh:mm:ss"))
+			msg = "No CSV files corresponf to selected time range %s : %s" % (timeRange[0].strftime("%Y-%m-%dT%H:%M:%S"), timeRange[1].strftime("%Y-%m-%dT%H:%M:%S"))
 			log.warning(msg)
 			return msg
 						
-		self.lastStartDateTime = timeRange[0]
 		self.getHeaders(fileList[0])
-		tempTable = np.concatenate(
-			[np.genfromtxt(file, 
-						skip_header = 1, 
-						delimiter=',',
-						converters={0: lambda x: pd.to_datetime(x.decode('utf-8'), format="%Y-%m-%d %H:%M:%S")}) for file in fileList], 
-			axis=0) 
+		with self.csvLock:
+			tempTable = np.concatenate(
+				[np.genfromtxt(file, 
+							skip_header = 1, 
+							delimiter=',',
+							converters={0: lambda x: pd.to_datetime(x.decode('utf-8'), format="%Y-%m-%d %H:%M:%S")}) for file in fileList], 
+				axis=0) 
 		
 		tempTable = np.array(tempTable, self.__genDt())
 		tempTable = np.sort(tempTable, axis=0)

@@ -6,16 +6,17 @@ import os
 
 from signal import signal, SIGINT
 from sys import exit, exc_info
+from math import sin
 
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
-global conn, s
+global conn, s, t
 
 def gracefulStop():
 	global conn, s
 	try:
-		conn.sendall("stop".encode())
+		conn.sendall("stop\r\n".encode())
 		conn.close()
 		s.close()
 	except Exception as e:
@@ -35,20 +36,23 @@ def printErr(e):
 	
 def genTimestamp():
 	now = datetime.now()
-	return now.strftime("%Y-%m-%d %H:%M:%S")
+	return now.strftime("%Y-%m-%d %H:%M:%S.%f")
 	
 def genData():
+	global t
 	retVal = ""
-	for i in range(0, 4):
-		retVal += ",%.6f" % (random.uniform(0, 5+i*4))
+	for i in range(0, 10):
+		retVal += ",%.6f" % ((i+1)*sin(t))
 		
+	t += 0.02
 	return retVal
 	
 def genLine():
-	return "%s%s" % (genTimestamp(), genData())
+	return "%s%s\r\n" % (genTimestamp(), genData())
 
 if __name__ == "__main__":
-	global conn, s
+	global conn, s, t
+	t = 0
 	signal(SIGINT, gracefulStopHandler)
 	
 	while True:
@@ -62,9 +66,10 @@ if __name__ == "__main__":
 					print('Connected by', addr)
 					while True:
 						data = genLine()
-						print(data)
+						print(data, end = "")
 						conn.sendall(data.encode())
-						time.sleep(1)
+						time.sleep(0.1)
 		except Exception as e:
 			printErr(e)
 			gracefulStop()
+			continue

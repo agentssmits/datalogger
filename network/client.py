@@ -46,12 +46,12 @@ if __name__ == "__main__":
 				s.connect((HOST, PORT))
 				while 1:
 					data = s.recv(1024).decode()
-					print('Received', data)
+					print('Received %s' % data, end ="")
 					if "stop" in data:
 						gracefulStop(terminate = True)
 						
 					dataBuffer.append(data)
-					if len(dataBuffer) > 10:
+					if len(dataBuffer) > 1:
 						csv.store(dataBuffer)
 						dataBuffer = []
 						

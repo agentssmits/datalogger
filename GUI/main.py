@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import QTime, QDateTime
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QFileDialog
 
 import warnings
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
@@ -9,8 +9,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from functools import partial
 
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import pandas as pd
 
 import matplotlib as mpl
@@ -20,111 +18,81 @@ from MplWidget import MplWidget
 import sys
 import logging as log
 import argparse
-import itertools
 import threading
+import os
 
 from DataLoader import Data
 from DateTimePicker import DateTimePicker
 
 import time
 
+# constants needed for logging of debug/warning/error messages
 LOG_FORMAT = "%(asctime)s %(levelname)-8s: %(message)s\t"
 TIMESTAMP_FORMAT = '%d-%m-%YT%H:%M:%S'
-COLOUR_ARR = ['crimson', 'silver', 'indigo', 'coral', 'saddlebrown', 'orange', 'black', 'olive', 'brown', 'navy', 'darkseagreen', 'red', 'teal', 'dodgerblue', 'deeppink']
-POINT_ARR = ['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X']
-# Enter file here.
+
+# specify *.ui file location for main window
 Ui_MainWindow, QtBaseClass = uic.loadUiType("datalogger.ui")
-
-global colours, points
-
-def genPointStyles(count):
-	global colours, points
-
-	colours = itertools.cycle(COLOUR_ARR[:count])
-	points = itertools.cycle(POINT_ARR[:count])
-	
-def getGridSize(columnCount):
-	if columnCount == 1:
-		return "11"
-	if columnCount == 2:
-		return "21"
-	if columnCount == 3:
-		return "31"
-	if columnCount == 4:
-		return "22"
-	if columnCount == 5 or columnCount == 6:
-		return "32"
-	if columnCount >= 7 and columnCount >= 9:
-		return "33"
-	if columnCount >= 10 and columnCount >= 12:
-		return "43"
-	log.warning("Unsupported data column count %d!" % (columnCount))
-	sys.exit()
 		
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 	def __init__(self):
-		#get initial CSV data
+		"""The constructor"""
+		
+		# default data time range corresponds to CSV start/end datetime
 		self.data = Data()
 		defaultStartDateTime, defaultEndDateTime = self.data.getTimestampRange()
+		# get initial CSV data
 		self.data.load(timeRange = [defaultStartDateTime, defaultEndDateTime])
 		
 		QtWidgets.QMainWindow.__init__(self)
 		Ui_MainWindow.__init__(self)
 		self.setupUi(self)
-		self.startDateTimePicker = DateTimePicker(self, self.startDateTimeButton, defaultStartDateTime) 
-		self.endDateTimePicker = DateTimePicker(self, self.endDateTimeButton, defaultEndDateTime) 
-		self.startDateTimeButton.clicked.connect(self.onStartDateTimeClicked)
-		self.endDateTimeButton.clicked.connect(self.onEndDateTimeClicked)
 		
-		self.startDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onDateTimeChanged)
-		self.endDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onDateTimeChanged)
+		# allow user to specify data root directory, by default it is current working directory
+		os.chdir(os.path.dirname(__file__))
+		self.rootSelEdit.setText(os.getcwd())
+		self.rootSelBtn.clicked.connect(self.getDir)
+		
+		self.allStartDateTimePicker = DateTimePicker(self, self.allStartDateTimeButton, defaultStartDateTime) 
+		self.allEndDateTimePicker = DateTimePicker(self, self.allEndDateTimeButton, defaultEndDateTime) 
+		self.allStartDateTimeButton.clicked.connect(self.onAllEndDateTimeClicked)
+		self.allEndDateTimeButton.clicked.connect(self.onAllEndDateTimeClicked)
+		
+		self.allStartDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onDateTimeChanged)
+		self.allEndDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onDateTimeChanged)
 		
 		self.onlineModeCheckBox.stateChanged.connect(self.setOnlineMode)
-		self.plotData()
+		
+		self.actionQuit.triggered.connect(self.quit)
+		self.actionQuit.setShortcut('Q')
 		
 		self.showMaximized()
 		
+		self.widget.canvas.setLayout(self.data.headers)
+		self.plotData()
+		
+		self.tabWidget.setCurrentIndex(1)
+		
+		self.selectedPlotNo = []
+		checkBoxes = (self.gridLayout_6.itemAt(i).widget() for i in range(self.gridLayout_6.count())) 
+		for checkBox in checkBoxes:
+			checkBox.stateChanged.connect(self.checkCheckboxes)
+
 	def plotData(self):
-		try:
-			global colours, points
-			genPointStyles(self.data.getColumnCount())
-			
-			series = self.data.headers
-			time = self.data.table[series[0]]
-			
-			grid = getGridSize(self.data.getColumnCount()-1)
-			for i in range (1, self.data.getColumnCount()):
-				self.widget.canvas.setLayout(grid+str(i))
+		self.widget.canvas.plot(self.data.headers, self.data.table)
 				
-				self.widget.canvas.ax.scatter(time, 
-										self.data.table[series[i]],
-										c = next(colours),
-										marker = next(points))
-				self.widget.canvas.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
-				self.widget.canvas.fig.autofmt_xdate()  
-				self.widget.canvas.ax.set_xlabel (series[0], fontsize=10)
-				self.widget.canvas.ax.set_ylabel (series[i], fontsize= 10)
-				self.widget.canvas.ax.autoscale(enable=True, axis='both', tight=None)
-			self.widget.canvas.draw()
-		except Exception as e:
-			print(e)
-			log.warning("Len of time series: %d" % (len(time)))
-			for i in range (1, self.data.getColumnCount()):
-				log.warning("Len of %d series: %d" % (i, len(time)))
-				
-	def onStartDateTimeClicked(self):
-		self.startDateTimePicker.show()		
+	def onAllEndDateTimeClicked(self):
+		self.allStartDateTimePicker.show()		
 	
-	def onEndDateTimeClicked(self):
-		self.endDateTimePicker.show()	
+	def onAllEndDateTimeClicked(self):
+		self.allEndDateTimePicker.show()	
 		
 	def onDateTimeChanged(self):
-		status = self.data.load(timeRange = [self.startDateTimePicker.dateTimeEdit.dateTime(), 
-							   self.endDateTimePicker.dateTimeEdit.dateTime()])
+		status = self.data.load(timeRange = [self.allStartDateTimePicker.dateTimeEdit.dateTime(), 
+							   self.allEndDateTimePicker.dateTimeEdit.dateTime()])
 		if status != "":
 			QMessageBox.warning(self, "Warning", status)
 		else:
-			self.widget.canvas.cla()
+			#self.widget.canvas.cla()
 			self.plotData()
 			
 	def setOnlineMode(self):
@@ -140,22 +108,59 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 			log.debug("Online plotting thread launched")
 		else:
 			return
-		self.endDateTimeButton.setEnabled(not status)
+		self.allEndDateTimeButton.setEnabled(not status)
 		self.data.setOnlineMode(status)
 		
 	def __onlinePlotThread(self):
 		while self.onlineModeCheckBox.checkState() == 2:
 			time.sleep(1)
 			if self.data.newData == True:
-				self.widget.canvas.cla()
+				#self.widget.canvas.cla()
 				self.plotData()
+				#self.plotUpdatedData()
 				series = self.data.headers
 				endTime = self.data.table[series[0]][-1]
 				ts = pd.to_datetime(str(endTime)) 
 				d = ts.strftime("%Y-%m-%d %H:%M:%S")
-				self.endDateTimeButton.setText(d)
-				self.endDateTimePicker.dateTimeEdit.setDateTime(QDateTime.fromString(d, "%Y-%m-%d %H:%M:%S"))
+				self.allEndDateTimeButton.setText(d)
+				self.allEndDateTimePicker.updateDateTime(d)
 				self.data.newData = False
+				
+	def getDir(self):
+		dir = QFileDialog.getExistingDirectory(
+			self,
+			"Select a folder",
+			os.getcwd(),
+			QFileDialog.ShowDirsOnly
+		)
+			
+		self.rootSelEdit.setText(dir)
+		return dir
+		
+	def checkCheckboxes(self):
+		checkBoxes = [self.gridLayout_6.itemAt(i).widget() for i in range(self.gridLayout_6.count())] 
+		for i in range(0, len(checkBoxes)):
+			index = int(checkBoxes[i].text().split(" ")[1])+1
+			if checkBoxes[i].isChecked():
+				if index not in self.selectedPlotNo:
+					self.selectedPlotNo.append(index)
+			else:
+				if index in self.selectedPlotNo:
+					self.selectedPlotNo.remove(index)
+		
+		selectedHeaders = [self.data.headers[0]]
+		for i in range(1, len(self.data.headers)):
+			if i in self.selectedPlotNo:
+				selectedHeaders.append(self.data.headers[i])
+
+		self.widget_2.canvas.cla()
+		if selectedHeaders != []:
+			self.widget_2.canvas.initAxes()
+			self.widget_2.canvas.setLayout(selectedHeaders)
+			self.widget_2.canvas.plot(selectedHeaders, self.data.table)
+		
+	def quit(self):
+		sys.exit(0)
 
 if __name__ == "__main__":
 	#parse input arguments
