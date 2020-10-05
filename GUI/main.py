@@ -37,6 +37,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 	def __init__(self):
 		"""The constructor"""
 		
+		self.selectedHeaders = []
+		
 		# default data time range corresponds to CSV start/end datetime
 		self.data = Data()
 		defaultStartDateTime, defaultEndDateTime = self.data.getTimestampRange()
@@ -52,23 +54,33 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.rootSelEdit.setText(os.getcwd())
 		self.rootSelBtn.clicked.connect(self.getDir)
 		
-		self.allStartDateTimePicker = DateTimePicker(self, self.allStartDateTimeButton, defaultStartDateTime) 
-		self.allEndDateTimePicker = DateTimePicker(self, self.allEndDateTimeButton, defaultEndDateTime) 
-		self.allStartDateTimeButton.clicked.connect(self.onAllEndDateTimeClicked)
+		# handle custom datetime selection for tab 'all'
+		self.allStartDateTimePicker = DateTimePicker(self, self.allStartDateTimeButton, defaultStartDateTime, title = "Select start datetime for plotting all data") 
+		self.allEndDateTimePicker = DateTimePicker(self, self.allEndDateTimeButton, defaultEndDateTime, title = "Select end datetime for plotting all data") 
+		self.allStartDateTimeButton.clicked.connect(self.onAllStartDateTimeClicked)
 		self.allEndDateTimeButton.clicked.connect(self.onAllEndDateTimeClicked)
 		
-		self.allStartDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onDateTimeChanged)
-		self.allEndDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onDateTimeChanged)
+		self.allStartDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onAllDateTimeChanged)
+		self.allEndDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onAllDateTimeChanged)
 		
-		self.onlineModeCheckBox.stateChanged.connect(self.setOnlineMode)
+		self.onlineAllModeCheckBox.stateChanged.connect(self.setOnlineMode)
+		
+		# handle custom datetime selection for tab 'custom'
+		self.customStartDateTimePicker = DateTimePicker(self, self.customStartDateTimeButton, defaultStartDateTime, title = "Select start datetime for plotting custom data") 
+		self.customEndDateTimePicker = DateTimePicker(self, self.customEndDateTimeButton, defaultEndDateTime, title = "Select end datetime for plotting custom data") 
+		self.customStartDateTimeButton.clicked.connect(self.onCustomEndDateTimeClicked)
+		self.customEndDateTimeButton.clicked.connect(self.onCustomEndDateTimeClicked)
+		
+		self.customStartDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onCustomDateTimeChanged)
+		self.customEndDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onCustomDateTimeChanged)
 		
 		self.actionQuit.triggered.connect(self.quit)
 		self.actionQuit.setShortcut('Q')
 		
 		self.showMaximized()
 		
-		self.widget.canvas.setLayout(self.data.headers)
-		self.plotData()
+		self.allMplWidget.canvas.setLayout(self.data.headers)
+		self.plotAllData()
 		
 		self.tabWidget.setCurrentIndex(1)
 		
@@ -77,30 +89,43 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		for checkBox in checkBoxes:
 			checkBox.stateChanged.connect(self.checkCheckboxes)
 
-	def plotData(self):
-		self.widget.canvas.plot(self.data.headers, self.data.table)
+	def plotAllData(self):
+		self.allMplWidget.canvas.plot(self.data.headers, self.data.table)
 				
-	def onAllEndDateTimeClicked(self):
+	def onAllStartDateTimeClicked(self):
 		self.allStartDateTimePicker.show()		
 	
 	def onAllEndDateTimeClicked(self):
 		self.allEndDateTimePicker.show()	
 		
-	def onDateTimeChanged(self):
+	def onCustomEndDateTimeClicked(self):
+		self.customStartDateTimePicker.show()		
+	
+	def onCustomEndDateTimeClicked(self):
+		self.customEndDateTimePicker.show()
+		
+	def onAllDateTimeChanged(self):
 		status = self.data.load(timeRange = [self.allStartDateTimePicker.dateTimeEdit.dateTime(), 
 							   self.allEndDateTimePicker.dateTimeEdit.dateTime()])
 		if status != "":
 			QMessageBox.warning(self, "Warning", status)
 		else:
-			#self.widget.canvas.cla()
-			self.plotData()
+			self.plotCustomData()
+			
+	def onCustomDateTimeChanged(self):
+		status = self.data.load(timeRange = [self.customStartDateTimePicker.dateTimeEdit.dateTime(), 
+							   self.customEndDateTimePicker.dateTimeEdit.dateTime()])
+		if status != "":
+			QMessageBox.warning(self, "Warning", status)
+		else:
+			self.plotAllData()
 			
 	def setOnlineMode(self):
-		if self.onlineModeCheckBox.checkState() == 0:
+		if self.onlineAllModeCheckBox.checkState() == 0:
 			status = False
 			self.onlineThread.join()
 			log.debug("Online plotting thread stopped")
-		elif self.onlineModeCheckBox.checkState() == 2:
+		elif self.onlineAllModeCheckBox.checkState() == 2:
 			status = True
 			self.onlineThread = threading.Thread(target=self.__onlinePlotThread)
 			self.onlineThread.daemon = True
@@ -112,11 +137,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.data.setOnlineMode(status)
 		
 	def __onlinePlotThread(self):
-		while self.onlineModeCheckBox.checkState() == 2:
+		while self.onlineAllModeCheckBox.checkState() == 2:
 			time.sleep(1)
 			if self.data.newData == True:
-				#self.widget.canvas.cla()
-				self.plotData()
+				#self.allMplWidget.canvas.cla()
+				self.plotAllData()
 				#self.plotUpdatedData()
 				series = self.data.headers
 				endTime = self.data.table[series[0]][-1]
@@ -137,6 +162,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.rootSelEdit.setText(dir)
 		return dir
 		
+	def plotCustomData(self):
+		self.customMplWidget.canvas.cla()
+		if self.selectedHeaders != []:
+			self.customMplWidget.canvas.initAxes()
+			self.customMplWidget.canvas.setLayout(self.selectedHeaders)
+			self.customMplWidget.canvas.plot(self.selectedHeaders, self.data.table)
+		
 	def checkCheckboxes(self):
 		checkBoxes = [self.gridLayout_6.itemAt(i).widget() for i in range(self.gridLayout_6.count())] 
 		for i in range(0, len(checkBoxes)):
@@ -148,16 +180,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 				if index in self.selectedPlotNo:
 					self.selectedPlotNo.remove(index)
 		
-		selectedHeaders = [self.data.headers[0]]
+		self.selectedHeaders = [self.data.headers[0]]
 		for i in range(1, len(self.data.headers)):
 			if i in self.selectedPlotNo:
-				selectedHeaders.append(self.data.headers[i])
-
-		self.widget_2.canvas.cla()
-		if selectedHeaders != []:
-			self.widget_2.canvas.initAxes()
-			self.widget_2.canvas.setLayout(selectedHeaders)
-			self.widget_2.canvas.plot(selectedHeaders, self.data.table)
+				self.selectedHeaders.append(self.data.headers[i])
+				
+		self.plotCustomData()
 		
 	def quit(self):
 		sys.exit(0)

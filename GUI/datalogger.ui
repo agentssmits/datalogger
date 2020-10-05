@@ -43,7 +43,7 @@
        <number>-6</number>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="currentTab">
        <attribute name="title">
@@ -594,7 +594,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="onlineModeCheckBox">
+             <widget class="QCheckBox" name="onlineAllModeCheckBox">
               <property name="text">
                <string>continiously update</string>
               </property>
@@ -621,7 +621,7 @@
          </layout>
         </item>
         <item row="0" column="0">
-         <widget class="MplWidget" name="widget" native="true"/>
+         <widget class="MplWidget" name="allMplWidget" native="true"/>
         </item>
         <item row="1" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout">
@@ -829,7 +829,7 @@
          </layout>
         </item>
         <item row="2" column="0">
-         <widget class="MplWidget" name="widget_2" native="true"/>
+         <widget class="MplWidget" name="customMplWidget" native="true"/>
         </item>
         <item row="3" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout_10">
@@ -854,7 +854,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="startDateTimeButton_3">
+           <widget class="QPushButton" name="customStartDateTimeButton">
             <property name="text">
              <string>PushButton</string>
             </property>
@@ -884,7 +884,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="endDateTimeButton_3">
+           <widget class="QPushButton" name="customEndDateTimeButton">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -927,7 +927,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="onlineModeCheckBox_3">
+           <widget class="QCheckBox" name="onlineCstomModeCheckBox">
             <property name="text">
              <string>continiously update</string>
             </property>

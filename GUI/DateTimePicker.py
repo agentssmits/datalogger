@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtCore import QTime, QDateTime
 from functools import partial
 
@@ -6,7 +7,7 @@ from functools import partial
 Ui_DateTimePicker, QtDateTimePickerClass = uic.loadUiType("datetimepicker.ui")
 
 class DateTimePicker(QtWidgets.QMainWindow, Ui_DateTimePicker):
-	def __init__(self, parent, button, defaultDateTime = None):
+	def __init__(self, parent, button, defaultDateTime = None, title = ""):
 		super(DateTimePicker, self).__init__(parent)
 		self.button = button
 		self.parent = parent
@@ -24,6 +25,14 @@ class DateTimePicker(QtWidgets.QMainWindow, Ui_DateTimePicker):
 			timeString = b.text().split(':')
 			time = QTime(int(timeString[0]), int(timeString[1]))
 			b.clicked.connect(partial(self.updateTime, time))
+			
+		if title != "":
+			self.setWindowTitle(title)
+		else:
+			self.setWindowTitle("Select datetime!")
+			
+		self.shortcutClose = QtWidgets.QShortcut(QKeySequence("Escape"), self)
+		self.shortcutClose.activated.connect(self.close)
 		
 	def updateDate(self):
 		date = self.calendarWidget.selectedDate()

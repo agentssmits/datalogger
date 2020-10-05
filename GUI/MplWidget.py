@@ -10,6 +10,7 @@ from matplotlib.lines import Line2D
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+import numpy as np
 
 import itertools
 import logging as log
@@ -34,7 +35,15 @@ def getGridSize(columnCount):
 		return (4,3)
 	log.warning("Unsupported data column count %d!" % (columnCount))
 	return (1,1)
-
+	
+def getLastSubplots(columnCount):
+	if columnCount in [0, 1, 2]:
+		return [columnCount]
+	if columnCount in [3, 4, 5]:
+		return range(columnCount-1, columnCount+1)
+	
+	return range(columnCount-2, columnCount+1)
+	
 class MplCanvas(FigureCanvas):
 	"""Class to represent the FigureCanvas widget"""
 	def __init__(self):
@@ -88,9 +97,18 @@ class MplCanvas(FigureCanvas):
 		"""
 		try:
 			time = table[headers[0]]
-			for i in range(0, len(headers)-1):
+			subplotCount = len(headers)-1
+			lastSublots = getLastSubplots(subplotCount-1)
+			for i in range(0, subplotCount):
 				self.line[i].set_data(time, table[headers[i+1]])
-				self.ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
+				self.ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
+				self.ax[i].xaxis.set_major_locator(plt.MaxNLocator(13))
+				if i in lastSublots:
+					plt.setp(self.ax[i].xaxis.get_majorticklabels(), rotation=-45, ha="left", rotation_mode="anchor") 
+				else:
+					self.ax[i].axes.xaxis.set_ticklabels([])
+					self.ax[i].axes.xaxis.set_visible(False)
+
 				self.ax[i].relim()
 				self.ax[i].autoscale_view()
 			self.draw()
