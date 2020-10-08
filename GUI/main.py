@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import QTime, QDateTime
+from PyQt5.QtCore import QTime, QDateTime, QSettings
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
 
 import warnings
@@ -84,10 +84,21 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 		self.tabWidget.setCurrentIndex(1)
 		
+		# Get settings to restore checkboxes
+		self.settings = QSettings(".GUI_settings", QSettings.IniFormat)
 		self.selectedPlotNo = []
 		checkBoxes = (self.gridLayout_6.itemAt(i).widget() for i in range(self.gridLayout_6.count())) 
 		for checkBox in checkBoxes:
+			checkBox.setChecked(self.settings.value("custom/"+checkBox.text(), False, type=bool))
+			# connect the slot to the signal by clicking the checkbox to save the state settings
+			checkBox.clicked.connect(partial(self.saveCheckBoxSettings, checkBox))
 			checkBox.stateChanged.connect(self.checkCheckboxes)
+			
+		self.checkCheckboxes()
+			
+	def saveCheckBoxSettings(self, checkBox):
+		self.settings.setValue("custom/"+checkBox.text(), checkBox.isChecked())
+		self.settings.sync()
 
 	def plotAllData(self):
 		self.allMplWidget.canvas.plot(self.data.headers, self.data.table)
