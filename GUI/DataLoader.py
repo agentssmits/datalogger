@@ -225,9 +225,9 @@ class Data:
 			
 		if fileList == []:
 			try:
-				msg = "No CSV files corresponf to selected time range %s : %s" % (timeRange[0].toString("yyyy-MM-ddThh:mm:ss"), timeRange[1].toString("yyyy-MM-ddThh:mm:ss"))
+				msg = "No CSV files correspond to selected time range %s : %s" % (timeRange[0].toString("yyyy-MM-ddThh:mm:ss"), timeRange[1].toString("yyyy-MM-ddThh:mm:ss"))
 			except:
-				msg = "No CSV files corresponf to selected time range %s : %s" % (timeRange[0].strftime("%Y-%m-%dT%H:%M:%S"), timeRange[1].strftime("%Y-%m-%dT%H:%M:%S"))
+				msg = "No CSV files correspond to selected time range %s : %s" % (timeRange[0].strftime("%Y-%m-%dT%H:%M:%S"), timeRange[1].strftime("%Y-%m-%dT%H:%M:%S"))
 			log.warning(msg)
 			return msg
 						

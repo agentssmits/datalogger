@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import QTime, QDateTime, QSettings
-from PyQt5.QtWidgets import QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QMessageBox, QFileDialog, QLineEdit, QSpinBox
 
 import warnings
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
@@ -84,20 +84,98 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 		self.tabWidget.setCurrentIndex(1)
 		
-		# Get settings to restore checkboxes
+		# Get settings to restore checkboxes 
 		self.settings = QSettings(".GUI_settings", QSettings.IniFormat)
 		self.selectedPlotNo = []
 		checkBoxes = (self.gridLayout_6.itemAt(i).widget() for i in range(self.gridLayout_6.count())) 
 		for checkBox in checkBoxes:
-			checkBox.setChecked(self.settings.value("custom/"+checkBox.text(), False, type=bool))
+			checkBox.setChecked(self.settings.value("custom_tab_1_selection/"+checkBox.text(), False, type=bool))
 			# connect the slot to the signal by clicking the checkbox to save the state settings
 			checkBox.clicked.connect(partial(self.saveCheckBoxSettings, checkBox))
 			checkBox.stateChanged.connect(self.checkCheckboxes)
+		
+		# Get settings to restore tab names 	
+		for id in range(2, self.tabWidget.count()-1):
+			name = self.settings.value("tab_names/tab"+str(id), "none", type=str)
+			if name != "none":
+				self.tabWidget.tabBar().setTabText(id, name)
+		
+		# Get settings to restore fields in Settings tab
+		widgets = self.settingsTab.findChildren(QLineEdit)
+		for widget in widgets:
+			if isinstance(widget, QLineEdit):
+				value = self.settings.value("settings/"+str(widget.objectName()), "none", type=str)
+				if value != "none":
+					widget.setText(value)
+					
+		widgets = self.settingsTab.findChildren(QSpinBox)
+		for widget in widgets:	
+			if isinstance(widget, QSpinBox):
+				value = self.settings.value("settings/"+str(widget.objectName()), 1, type=int)
+				widget.setValue(value)
+			
+		# add custom plot tabs if needed
+		print (self.customTabCount.value())
 			
 		self.checkCheckboxes()
+		
+		self.tabNameEditor = QLineEdit(self)
+		self.tabNameEditor.setWindowFlags(QtCore.Qt.Popup)
+		self.tabNameEditor.setFocusProxy(self)
+		self.tabNameEditor.editingFinished.connect(self.handleTabEditingFinished)
+		self.tabNameEditor.installEventFilter(self)
+		
+		self.tabWidget.tabBarDoubleClicked.connect(self.tabDoubleClickEvent)
+		
+		# save values of QLineEdit & QSpinBox widgets in Settings tab
+		widgets = self.settingsTab.findChildren(QLineEdit)
+		for widget in widgets:
+			if isinstance(widget, QSpinBox):
+				widget.textChanged.connect(partial(self.saveQSpinBox, widget))
+				
+		widgets = self.settingsTab.findChildren(QSpinBox)
+		for widget in widgets:
+			if isinstance(widget, QSpinBox):
+				widget.textChanged.connect(partial(self.saveQSpinBox, widget))
+				
+	def saveQLineEdit(self, widget):
+		self.settings.setValue("settings/"+ widget.objectName(), widget.text())
+		self.settings.sync()
+		
+	def saveQSpinBox(self, widget):
+		self.settings.setValue("settings/"+ widget.objectName(), widget.value())
+		self.settings.sync()
+		
+	"""
+	Detects double click on tab name and enables renaming
+	This method does not affect tabs 0-1 and last tab
+	"""
+	def tabDoubleClickEvent(self):
+		id = self.tabWidget.tabBar().currentIndex()
+		if id >= 2 and id < self.tabWidget.count()-1:
+			self.editTab(id)
+		
+	def editTab(self, id):
+		rect = self.tabWidget.tabBar().tabRect(id)
+		self.tabNameEditor.setFixedSize(rect.size())
+		self.tabNameEditor.move(self.mapToGlobal(rect.topLeft()))
+		self.tabNameEditor.setText(self.tabWidget.tabBar().tabText(id))
+		if not self.tabNameEditor.isVisible():
+			self.tabNameEditor.show()
+			
+	def handleTabEditingFinished(self):
+		id = self.tabWidget.tabBar().currentIndex()
+		if id >= 0:
+			self.tabNameEditor.hide()
+			self.tabWidget.tabBar().setTabText(id, self.tabNameEditor.text())
+			self.saveTabNames(id, self.tabNameEditor.text())
 			
 	def saveCheckBoxSettings(self, checkBox):
-		self.settings.setValue("custom/"+checkBox.text(), checkBox.isChecked())
+		self.settings.setValue("custom_tab_1_selection/"+checkBox.text(), checkBox.isChecked())
+		self.settings.sync()
+		
+	def saveTabNames(self, id, name):
+		self.settings.setValue("tab_names/tab"+str(id), name)
 		self.settings.sync()
 
 	def plotAllData(self):
