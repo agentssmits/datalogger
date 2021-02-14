@@ -76,8 +76,10 @@ class Data:
 		self.metaLock = FileLock(META_LOCK_FILE)
 		self.csvLock = FileLock(CSV_LOCK_FILE)
 		
-		self.table = []
-		self.prevTable = []
+		self.table = {}
+		self.prevTable = {}
+		self.prevTable[0] = []
+		
 		self.headers = []
 		self.rootDir = rootDir
 		self.metadata = Metadata()
@@ -201,7 +203,7 @@ class Data:
 			retVal.append((name, type))
 		return retVal
 	
-	def load(self, timeRange = []):
+	def load(self, timeRange = [], no = 0):
 		"""
 		Perform data loading from selected CSV files according to 
 		specified time range and converting to numpy array
@@ -244,14 +246,14 @@ class Data:
 		tempTable = np.sort(tempTable, axis=0)
 		
 		if timeRange == []:
-			self.table = tempTable
+			self.table[no] = tempTable
 		else:
-			self.table = tempTable[np.logical_and(tempTable[self.headers[0]] >= timeRange[0], tempTable[self.headers[0]] <= timeRange[1])]
+			self.table[no] = tempTable[np.logical_and(tempTable[self.headers[0]] >= timeRange[0], tempTable[self.headers[0]] <= timeRange[1])]
 		
-		if len(self.table) != len(self.prevTable):
+		if len(self.table[no]) != len(self.prevTable[no]):
 			log.debug("Loaded %d columns and %d lines" % (self.getColumnCount(), self.getLineCount()))
 			log.debug("Column headers: %s", str(self.headers))
-			self.prevTable = self.table
+			self.prevTable[no] = self.table[no]
 			self.newData = True
 		else:
 			log.debug("No new data found!")
@@ -270,7 +272,7 @@ class Data:
 		currently 0th CSV file is used ti retrieve headers, 
 		assuming all other files have the same structure
 		"""
-		return (len(self.table[0]))
+		return (len(self.table[0][0]))
 	
 	def getLineCount(self):
 		"""
@@ -279,7 +281,7 @@ class Data:
 		currently 0th CSV file is used ti retrieve headers, 
 		assuming all other files have the same structure
 		"""
-		return np.size(self.table, 0)
+		return np.size(self.table[0], 0)
 	
 	def setOnlineMode(self, mode):
 		self.onlineMode = mode

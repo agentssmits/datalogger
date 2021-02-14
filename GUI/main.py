@@ -23,6 +23,7 @@ import os
 
 from DataLoader import Data
 from DateTimePicker import DateTimePicker
+from customTab import addCustomTabs
 
 import time
 
@@ -38,12 +39,17 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		"""The constructor"""
 		
 		self.selectedHeaders = []
-		
+		self.customStartDateTimePickerArr = {}
+		self.customEndDateTimePickerArr = {}
+		self.customStartDateTimeButtonArr = {}
+		self.customEndDateTimeButtonArr = {}
+		self.customMplWidgetArr = {}
+
 		# default data time range corresponds to CSV start/end datetime
 		self.data = Data()
-		defaultStartDateTime, defaultEndDateTime = self.data.getTimestampRange()
+		self.defaultStartDateTime, self.defaultEndDateTime = self.data.getTimestampRange()
 		# get initial CSV data
-		self.data.load(timeRange = [defaultStartDateTime, defaultEndDateTime])
+		self.data.load(timeRange = [self.defaultStartDateTime, self.defaultEndDateTime])
 		
 		QtWidgets.QMainWindow.__init__(self)
 		Ui_MainWindow.__init__(self)
@@ -55,8 +61,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.rootSelBtn.clicked.connect(self.getDir)
 		
 		# handle custom datetime selection for tab 'all'
-		self.allStartDateTimePicker = DateTimePicker(self, self.allStartDateTimeButton, defaultStartDateTime, title = "Select start datetime for plotting all data") 
-		self.allEndDateTimePicker = DateTimePicker(self, self.allEndDateTimeButton, defaultEndDateTime, title = "Select end datetime for plotting all data") 
+		self.allStartDateTimePicker = DateTimePicker(self, self.allStartDateTimeButton, self.defaultStartDateTime, title = "Select start datetime for plotting all data") 
+		self.allEndDateTimePicker = DateTimePicker(self, self.allEndDateTimeButton, self.defaultEndDateTime, title = "Select end datetime for plotting all data") 
 		self.allStartDateTimeButton.clicked.connect(self.onAllStartDateTimeClicked)
 		self.allEndDateTimeButton.clicked.connect(self.onAllEndDateTimeClicked)
 		
@@ -64,15 +70,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.allEndDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onAllDateTimeChanged)
 		
 		self.onlineAllModeCheckBox.stateChanged.connect(self.setOnlineMode)
-		
-		# handle custom datetime selection for tab 'custom'
-		self.customStartDateTimePicker = DateTimePicker(self, self.customStartDateTimeButton, defaultStartDateTime, title = "Select start datetime for plotting custom data") 
-		self.customEndDateTimePicker = DateTimePicker(self, self.customEndDateTimeButton, defaultEndDateTime, title = "Select end datetime for plotting custom data") 
-		self.customStartDateTimeButton.clicked.connect(self.onCustomEndDateTimeClicked)
-		self.customEndDateTimeButton.clicked.connect(self.onCustomEndDateTimeClicked)
-		
-		self.customStartDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onCustomDateTimeChanged)
-		self.customEndDateTimePicker.dateTimeEdit.dateTimeChanged.connect(self.onCustomDateTimeChanged)
 		
 		self.actionQuit.triggered.connect(self.quit)
 		self.actionQuit.setShortcut('Q')
@@ -84,23 +81,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 		self.tabWidget.setCurrentIndex(1)
 		
-		# Get settings to restore checkboxes 
-		self.settings = QSettings(".GUI_settings", QSettings.IniFormat)
-		self.selectedPlotNo = []
-		checkBoxes = (self.gridLayout_6.itemAt(i).widget() for i in range(self.gridLayout_6.count())) 
-		for checkBox in checkBoxes:
-			checkBox.setChecked(self.settings.value("custom_tab_1_selection/"+checkBox.text(), False, type=bool))
-			# connect the slot to the signal by clicking the checkbox to save the state settings
-			checkBox.clicked.connect(partial(self.saveCheckBoxSettings, checkBox))
-			checkBox.stateChanged.connect(self.checkCheckboxes)
-		
-		# Get settings to restore tab names 	
-		for id in range(2, self.tabWidget.count()-1):
-			name = self.settings.value("tab_names/tab"+str(id), "none", type=str)
-			if name != "none":
-				self.tabWidget.tabBar().setTabText(id, name)
-		
 		# Get settings to restore fields in Settings tab
+		self.settings = QSettings(".GUI_settings", QSettings.IniFormat)
 		widgets = self.settingsTab.findChildren(QLineEdit)
 		for widget in widgets:
 			if isinstance(widget, QLineEdit):
@@ -113,9 +95,19 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 			if isinstance(widget, QSpinBox):
 				value = self.settings.value("settings/"+str(widget.objectName()), 1, type=int)
 				widget.setValue(value)
-			
-		# add custom plot tabs if needed
-		print (self.customTabCount.value())
+		
+		addCustomTabs(self, self.customTabCount.value()-1)
+
+		self.restoreTabNames()
+		
+		# Get settings to restore checkboxes 
+		self.selectedPlotNo = []
+		checkBoxes = (self.gridLayout_6.itemAt(i).widget() for i in range(self.gridLayout_6.count())) 
+		for checkBox in checkBoxes:
+			checkBox.setChecked(self.settings.value("custom_tab_1_selection/"+checkBox.text(), False, type=bool))
+			# connect the slot to the signal by clicking the checkbox to save the state settings
+			checkBox.clicked.connect(partial(self.saveCheckBoxSettings, checkBox))
+			checkBox.stateChanged.connect(self.checkCheckboxes)
 			
 		self.checkCheckboxes()
 		
@@ -130,13 +122,65 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		# save values of QLineEdit & QSpinBox widgets in Settings tab
 		widgets = self.settingsTab.findChildren(QLineEdit)
 		for widget in widgets:
-			if isinstance(widget, QSpinBox):
-				widget.textChanged.connect(partial(self.saveQSpinBox, widget))
+			if isinstance(widget, QLineEdit):
+				widget.textChanged.connect(partial(self.saveQLineEdit, widget))
 				
 		widgets = self.settingsTab.findChildren(QSpinBox)
 		for widget in widgets:
 			if isinstance(widget, QSpinBox):
 				widget.textChanged.connect(partial(self.saveQSpinBox, widget))
+				
+		self.customTabCount.valueChanged.connect(self.updateCustomTabCount)
+		
+		# handle custom datetime selection for tab 'custom'
+
+		self.customStartDateTimeButtonArr[0] = self.customStartDateTimeButton
+		self.customEndDateTimeButtonArr[0] = self.customEndDateTimeButton
+		self.customMplWidgetArr[0] = self.customMplWidget
+		self.setupCustomTabs()
+		
+		self.plotCustomData()
+		
+	def setupCustomTabs(self):
+		for i in self.getCustomTabRange():
+			self.customStartDateTimePickerArr[i] = DateTimePicker(self, self.customStartDateTimeButtonArr[i], self.defaultStartDateTime, title = "Select start datetime for plotting custom data") 
+			self.customEndDateTimePickerArr[i] = DateTimePicker(self, self.customEndDateTimeButtonArr[i], self.defaultEndDateTime, title = "Select end datetime for plotting custom data") 
+			self.customStartDateTimeButtonArr[i].clicked.connect(partial(self.onCustomStartDateTimeClicked, picker = self.customStartDateTimePickerArr[i]))
+			self.customEndDateTimeButtonArr[i].clicked.connect(partial(self.onCustomEndDateTimeClicked, picker = self.customEndDateTimePickerArr[i]))
+			
+			self.customStartDateTimePickerArr[i].dateTimeEdit.dateTimeChanged.connect(self.onCustomDateTimeChanged)
+			self.customEndDateTimePickerArr[i].dateTimeEdit.dateTimeChanged.connect(self.onCustomDateTimeChanged)
+	
+	def restoreTabNames(self):
+		# Get settings to restore tab names 	
+		for id in range(2, self.tabWidget.count()-1):
+			name = self.settings.value("tab_names/tab"+str(id), "none", type=str)
+			if name != "none":
+				self.tabWidget.tabBar().setTabText(id, name)
+						
+	def getCustomTabRange(self):
+		endIndex = self.tabWidget.count() - 3
+		return range(0, endIndex)
+			
+	def updateCustomTabCount(self):
+		oldCustomTabCount = self.tabWidget.count() - 3
+		if self.customTabCount.value() > oldCustomTabCount:
+			# add additional tabs
+			tabsToAdd = self.customTabCount.value() - oldCustomTabCount
+			startIndex = oldCustomTabCount + 2
+			addCustomTabs(self, tabsToAdd, startIndex)
+			self.restoreTabNames()
+			self.plotCustomData()
+		elif self.customTabCount.value() < oldCustomTabCount:
+			# delete tabs
+			tabsToDelete =  oldCustomTabCount - self.customTabCount.value()
+			indexTo = oldCustomTabCount + 2
+			indexFrom = indexTo - tabsToDelete
+			
+			for i in range(indexFrom, indexTo):
+				self.tabWidget.removeTab(i)
+				
+		self.setupCustomTabs()
 				
 	def saveQLineEdit(self, widget):
 		self.settings.setValue("settings/"+ widget.objectName(), widget.text())
@@ -179,7 +223,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.settings.sync()
 
 	def plotAllData(self):
-		self.allMplWidget.canvas.plot(self.data.headers, self.data.table)
+		self.allMplWidget.canvas.plot(self.data.headers, self.data.table[0])
 				
 	def onAllStartDateTimeClicked(self):
 		self.allStartDateTimePicker.show()		
@@ -187,11 +231,17 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 	def onAllEndDateTimeClicked(self):
 		self.allEndDateTimePicker.show()	
 		
-	def onCustomEndDateTimeClicked(self):
-		self.customStartDateTimePicker.show()		
+	def onCustomStartDateTimeClicked(self, picker = None):
+		if picker == None:
+			self.customStartDateTimePicker.show()
+		else:
+			picker.show()
 	
-	def onCustomEndDateTimeClicked(self):
-		self.customEndDateTimePicker.show()
+	def onCustomEndDateTimeClicked(self, picker = None):
+		if picker == None:
+			self.customEndDateTimePicker.show()
+		else:
+			picker.show()
 		
 	def onAllDateTimeChanged(self):
 		status = self.data.load(timeRange = [self.allStartDateTimePicker.dateTimeEdit.dateTime(), 
@@ -201,7 +251,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		else:
 			self.plotCustomData()
 			
-	def onCustomDateTimeChanged(self):
+	def onCustomDateTimeChanged(self, tabNo = 0):
 		status = self.data.load(timeRange = [self.customStartDateTimePicker.dateTimeEdit.dateTime(), 
 							   self.customEndDateTimePicker.dateTimeEdit.dateTime()])
 		if status != "":
@@ -233,7 +283,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 				self.plotAllData()
 				#self.plotUpdatedData()
 				series = self.data.headers
-				endTime = self.data.table[series[0]][-1]
+				endTime = self.data.table[0][series[0]][-1]
 				ts = pd.to_datetime(str(endTime)) 
 				d = ts.strftime("%Y-%m-%d %H:%M:%S")
 				self.allEndDateTimeButton.setText(d)
@@ -252,11 +302,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		return dir
 		
 	def plotCustomData(self):
-		self.customMplWidget.canvas.cla()
-		if self.selectedHeaders != []:
-			self.customMplWidget.canvas.initAxes()
-			self.customMplWidget.canvas.setLayout(self.selectedHeaders)
-			self.customMplWidget.canvas.plot(self.selectedHeaders, self.data.table)
+		for i in self.getCustomTabRange():
+			widget = self.customMplWidgetArr[i]
+			widget.canvas.cla()
+			if self.selectedHeaders != []:
+				widget.canvas.initAxes()
+				widget.canvas.setLayout(self.selectedHeaders)
+				widget.canvas.plot(self.selectedHeaders, self.data.table[0])
 		
 	def checkCheckboxes(self):
 		checkBoxes = [self.gridLayout_6.itemAt(i).widget() for i in range(self.gridLayout_6.count())] 
@@ -273,9 +325,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		for i in range(1, len(self.data.headers)):
 			if i in self.selectedPlotNo:
 				self.selectedHeaders.append(self.data.headers[i])
-				
-		self.plotCustomData()
-		
+						
 	def quit(self):
 		sys.exit(0)
 
