@@ -38,12 +38,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 	def __init__(self):
 		"""The constructor"""
 		
-		self.selectedHeaders = []
+		self.selectedHeaders = {}
 		self.customStartDateTimePickerArr = {}
 		self.customEndDateTimePickerArr = {}
 		self.customStartDateTimeButtonArr = {}
 		self.customEndDateTimeButtonArr = {}
 		self.customMplWidgetArr = {}
+		self.customSelectionCheckBoxArr = {}
 
 		# default data time range corresponds to CSV start/end datetime
 		self.data = Data()
@@ -71,16 +72,16 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 		self.onlineAllModeCheckBox.stateChanged.connect(self.setOnlineMode)
 		
+		# set up shortcut q to exit
 		self.actionQuit.triggered.connect(self.quit)
 		self.actionQuit.setShortcut('Q')
 		
 		self.showMaximized()
 		
+		# plot data on tab "All"
 		self.allMplWidget.canvas.setLayout(self.data.headers)
 		self.plotAllData()
-		
-		self.tabWidget.setCurrentIndex(1)
-		
+				
 		# Get settings to restore fields in Settings tab
 		self.settings = QSettings(".GUI_settings", QSettings.IniFormat)
 		widgets = self.settingsTab.findChildren(QLineEdit)
@@ -96,27 +97,37 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 				value = self.settings.value("settings/"+str(widget.objectName()), 1, type=int)
 				widget.setValue(value)
 		
+		# add custom tabs needed after tab "All"
+		self.tabWidget.setCurrentIndex(1)
 		addCustomTabs(self, self.customTabCount.value()-1)
-
 		self.restoreTabNames()
 		
-		# Get settings to restore checkboxes 
-		self.selectedPlotNo = []
-		checkBoxes = (self.gridLayout_6.itemAt(i).widget() for i in range(self.gridLayout_6.count())) 
-		for checkBox in checkBoxes:
-			checkBox.setChecked(self.settings.value("custom_tab_1_selection/"+checkBox.text(), False, type=bool))
-			# connect the slot to the signal by clicking the checkbox to save the state settings
-			checkBox.clicked.connect(partial(self.saveCheckBoxSettings, checkBox))
-			checkBox.stateChanged.connect(self.checkCheckboxes)
+		# get settings to restore checkboxes 
+		self.selectedPlotNo = {}
+		# collect checkboxes from 1st custom tab
+		checkBoxes = {}
+		for i in range(self.gridLayout_6.count()):
+			checkBoxes[i] = self.gridLayout_6.itemAt(i).widget()
+		self.customSelectionCheckBoxArr[0] = checkBoxes.copy()
 			
+		for i in range(len(self.customSelectionCheckBoxArr)):
+			for j in range(len(self.customSelectionCheckBoxArr[i])):
+				checkBox = self.customSelectionCheckBoxArr[i][j]
+				attr = "custom_tab_%d_selection/" % (i)
+				checkBox.setChecked(self.settings.value(attr+checkBox.text(), False, type=bool))
+				# connect the slot to the signal by clicking the checkbox to save the state settings
+				checkBox.clicked.connect(partial(self.saveCheckBoxSettings, checkBox, i))
+				checkBox.stateChanged.connect(self.checkCheckboxes)
+			
+		# plot custom plots according to checkboxes
 		self.checkCheckboxes()
 		
+		# enable renaming custom tabs
 		self.tabNameEditor = QLineEdit(self)
 		self.tabNameEditor.setWindowFlags(QtCore.Qt.Popup)
 		self.tabNameEditor.setFocusProxy(self)
 		self.tabNameEditor.editingFinished.connect(self.handleTabEditingFinished)
 		self.tabNameEditor.installEventFilter(self)
-		
 		self.tabWidget.tabBarDoubleClicked.connect(self.tabDoubleClickEvent)
 		
 		# save values of QLineEdit & QSpinBox widgets in Settings tab
@@ -138,9 +149,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.customEndDateTimeButtonArr[0] = self.customEndDateTimeButton
 		self.customMplWidgetArr[0] = self.customMplWidget
 		self.setupCustomTabs()
-		
-		self.plotCustomData()
-		
+				
 	def setupCustomTabs(self):
 		for i in self.getCustomTabRange():
 			self.customStartDateTimePickerArr[i] = DateTimePicker(self, self.customStartDateTimeButtonArr[i], self.defaultStartDateTime, title = "Select start datetime for plotting custom data") 
@@ -214,8 +223,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.tabWidget.tabBar().setTabText(id, self.tabNameEditor.text())
 			self.saveTabNames(id, self.tabNameEditor.text())
 			
-	def saveCheckBoxSettings(self, checkBox):
-		self.settings.setValue("custom_tab_1_selection/"+checkBox.text(), checkBox.isChecked())
+	def saveCheckBoxSettings(self, checkBox, index):
+		attr = "custom_tab_%d_selection/" % (index)
+		self.settings.setValue(attr+checkBox.text(), checkBox.isChecked())
 		self.settings.sync()
 		
 	def saveTabNames(self, id, name):
@@ -303,28 +313,47 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 	def plotCustomData(self):
 		for i in self.getCustomTabRange():
-			widget = self.customMplWidgetArr[i]
-			widget.canvas.cla()
-			if self.selectedHeaders != []:
+			try:
+				widget = self.customMplWidgetArr[i]
+				widget.canvas.cla()
 				widget.canvas.initAxes()
-				widget.canvas.setLayout(self.selectedHeaders)
-				widget.canvas.plot(self.selectedHeaders, self.data.table[0])
+				widget.canvas.draw()
+				# do not plot if only time series provided
+				if len(self.selectedHeaders[i]) == 1:
+					continue
+				if self.selectedHeaders[i] != []:
+					widget.canvas.setLayout(self.selectedHeaders[i])
+					log.debug("Will plot for tab %d: %s", i, str(self.selectedHeaders[i]))
+					widget.canvas.plot(self.selectedHeaders[i], self.data.table[0])
+			except Exception as e:
+				log.error("Something failed at plotting %d tab" % (i))
+				log.error(str(e))
 		
 	def checkCheckboxes(self):
-		checkBoxes = [self.gridLayout_6.itemAt(i).widget() for i in range(self.gridLayout_6.count())] 
-		for i in range(0, len(checkBoxes)):
-			index = int(checkBoxes[i].text().split(" ")[1])+1
-			if checkBoxes[i].isChecked():
-				if index not in self.selectedPlotNo:
-					self.selectedPlotNo.append(index)
-			else:
-				if index in self.selectedPlotNo:
-					self.selectedPlotNo.remove(index)
-		
-		self.selectedHeaders = [self.data.headers[0]]
-		for i in range(1, len(self.data.headers)):
-			if i in self.selectedPlotNo:
-				self.selectedHeaders.append(self.data.headers[i])
+		for j in range(0, len(self.customSelectionCheckBoxArr)):
+			checkBoxes = self.customSelectionCheckBoxArr[j]
+			try:
+				tabSelection = self.selectedPlotNo[j]
+			except:
+				tabSelection = []
+					
+			for i in range(0, len(checkBoxes)):
+				index = int(checkBoxes[i].text().split(" ")[1])+1
+					
+				if checkBoxes[i].isChecked():
+					if index not in tabSelection:
+						tabSelection.append(index)
+				else:
+					if index in tabSelection:
+						tabSelection.remove(index)
+			
+			self.selectedHeaders[j] = [self.data.headers[0]]
+			for i in range(1, len(self.data.headers)):
+				if i in tabSelection:
+					self.selectedHeaders[j].append(self.data.headers[i])
+			
+			self.selectedPlotNo[j] = tabSelection
+		self.plotCustomData()
 						
 	def quit(self):
 		sys.exit(0)
