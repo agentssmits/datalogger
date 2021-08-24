@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import QTime, QDateTime, QSettings
-from PyQt5.QtWidgets import QMessageBox, QFileDialog, QLineEdit, QSpinBox
+from PyQt5.QtWidgets import QMessageBox, QFileDialog, QLineEdit, QSpinBox, QCheckBox, QComboBox
 
 import warnings
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
@@ -10,6 +10,7 @@ from matplotlib.figure import Figure
 from functools import partial
 
 import pandas as pd
+import numpy as np
 
 import matplotlib as mpl
 
@@ -20,12 +21,14 @@ import logging as log
 import argparse
 import threading
 import os
+import time
+import csv
 
 from DataLoader import Data
 from DateTimePicker import DateTimePicker
 from customTab import addCustomTabs
 
-import time
+import logerino
 
 # constants needed for logging of debug/warning/error messages
 LOG_FORMAT = "%(asctime)s %(levelname)-8s: %(message)s\t"
@@ -33,10 +36,56 @@ TIMESTAMP_FORMAT = '%d-%m-%YT%H:%M:%S'
 
 # specify *.ui file location for main window
 Ui_MainWindow, QtBaseClass = uic.loadUiType("datalogger.ui")
+
+# specify number of max channels of datalogger
+CH_COUNT = 12
+
+# make correspondence between sps and its code number
+datalogger = logerino.Logerino("", 0)
+decodeSPS = {
+	2.5: 	datalogger.ADC_SPS_2_5,
+	5: 		datalogger.ADC_SPS_5,
+	10: 	datalogger.ADC_SPS_10,
+	16.6: 	datalogger.ADC_SPS_16_6,
+	20: 	datalogger.ADC_SPS_20,
+	50: 	datalogger.ADC_SPS_50,
+	60: 	datalogger.ADC_SPS_60,
+	100:	datalogger.ADC_SPS_100,
+	200:	datalogger.ADC_SPS_200,
+	400:	datalogger.ADC_SPS_400,
+	800:	datalogger.ADC_SPS_800,
+	1000:	datalogger.ADC_SPS_1000,
+	2000:	datalogger.ADC_SPS_2000,
+	4000:	datalogger.ADC_SPS_4000
+}
+
+decodeCurrent = {
+	0:		datalogger.ADC_CURRENT_OFF,
+	10:		datalogger.ADC_CURRENT_10,
+	50:		datalogger.ADC_CURRENT_50,
+	100:	datalogger.ADC_CURRENT_100,
+	250:	datalogger.ADC_CURRENT_250,
+	500:	datalogger.ADC_CURRENT_500,
+	750:	datalogger.ADC_CURRENT_750,
+	1000:	datalogger.ADC_CURRENT_1000,
+	1500:	datalogger.ADC_CURRENT_1500,
+	2000:	datalogger.ADC_CURRENT_2000    
+}
+
+decodeRatio = {
+	0:		datalogger.USE_RATIOMETRIC_OFF,
+	1:		datalogger.USE_RATIOMETRIC_ON
+}
 		
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
-	def __init__(self):
+	def __init__(self, offline = False):
 		"""The constructor"""
+		
+		self.offline = offline
+		self.dataloggerChannelsEnabled = [0]*CH_COUNT
+		self.dataloggerChannelCurrent = [0]*CH_COUNT
+		self.dataloggerChannelRatioMes = [0]*CH_COUNT
+		self.dataloggerChanelEnableCheckBoxes = []
 		
 		self.selectedHeaders = {}
 		self.customStartDateTimePickerArr = {}
@@ -149,7 +198,60 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.customEndDateTimeButtonArr[0] = self.customEndDateTimeButton
 		self.customMplWidgetArr[0] = self.customMplWidget
 		self.setupCustomTabs()
-				
+		
+		# try to autoconnect to datalogger board as well as handle press of button 'datalogger_connect_btn'
+		self.openDatalogger()
+		self.datalogger_connect_btn.clicked.connect(self.openDatalogger)
+		time.sleep(1)
+		
+		# another handles for controlling datalogger board
+		self.datalogger_sps.currentTextChanged.connect(self.setDataloggerSampleRate)
+		
+		widgets = self.settingsTab.findChildren(QCheckBox)
+		for widget in widgets:	
+			if isinstance(widget, QCheckBox):
+				if "enabled" in widget.objectName() and "datalogger" in widget.objectName():
+					widget.stateChanged.connect(partial(self.dataloggerChannelCheckBoxHandler, widget))
+					self.dataloggerChanelEnableCheckBoxes.append(widget)
+				elif "ratio" in widget.objectName() and "datalogger" in widget.objectName():
+					widget.stateChanged.connect(partial(self.checkDataloggerRatiometricMode, widget))
+					
+		widgets = self.settingsTab.findChildren(QComboBox)
+		for widget in widgets:	
+			if isinstance(widget, QComboBox):
+				if "current" in widget.objectName() and "datalogger" in widget.objectName():
+					widget.currentIndexChanged.connect(partial(self.checkDataloggerChannelCurrent, widget))
+					
+		# restore prevoius states of current combo box
+		widgets = self.settingsTab.findChildren(QComboBox)
+		for widget in widgets:	
+			if isinstance(widget, QComboBox):
+				if "current" in widget.objectName() and "datalogger" in widget.objectName():
+					value = self.settings.value("settings/"+str(widget.objectName()), -1, type=int)
+					if value != -1:
+						widget.setCurrentIndex(value)
+					
+		# restore prevoius states of ratio mode checkBox
+		widgets = self.settingsTab.findChildren(QCheckBox)
+		for widget in widgets:	
+			if isinstance(widget, QCheckBox):
+				if "ratio" in widget.objectName() and "datalogger" in widget.objectName():
+					value = self.settings.value("settings/"+str(widget.objectName()), False, type=bool)
+					if value != False:
+						widget.setChecked(value)
+		
+		# restore prevoius states of channel enable checkBox
+		widgets = self.settingsTab.findChildren(QCheckBox)
+		for widget in widgets:	
+			if isinstance(widget, QCheckBox):		
+				if "enabled" in widget.objectName() and "datalogger" in widget.objectName():
+					value = self.settings.value("settings/"+str(widget.objectName()), False, type=bool)
+					if value != False:
+						widget.setChecked(value)
+
+		# handle to start sampling
+		self.datalogger_start_btn.clicked.connect(self.startSampling)
+					
 	def setupCustomTabs(self):
 		for i in self.getCustomTabRange():
 			self.customStartDateTimePickerArr[i] = DateTimePicker(self, self.customStartDateTimeButtonArr[i], self.defaultStartDateTime, title = "Select start datetime for plotting custom data") 
@@ -198,6 +300,15 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 	def saveQSpinBox(self, widget):
 		self.settings.setValue("settings/"+ widget.objectName(), widget.value())
 		self.settings.sync()
+	
+	def saveQCheckBox(self, widget):
+		self.settings.setValue("settings/"+ widget.objectName(), widget.isChecked())
+		self.settings.sync()
+		
+	def saveQComboBox(self, widget):
+		self.settings.setValue("settings/"+ widget.objectName(), widget.currentIndex())
+		self.settings.sync()
+	
 		
 	"""
 	Detects double click on tab name and enables renaming
@@ -316,12 +427,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 			try:
 				widget = self.customMplWidgetArr[i]
 				widget.canvas.cla()
-				widget.canvas.initAxes()
 				widget.canvas.draw()
 				# do not plot if only time series provided
 				if len(self.selectedHeaders[i]) == 1:
 					continue
 				if self.selectedHeaders[i] != []:
+					widget.canvas.initAxes()
 					widget.canvas.setLayout(self.selectedHeaders[i])
 					log.debug("Will plot for tab %d: %s", i, str(self.selectedHeaders[i]))
 					widget.canvas.plot(self.selectedHeaders[i], self.data.table[0])
@@ -354,8 +465,183 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 			
 			self.selectedPlotNo[j] = tabSelection
 		self.plotCustomData()
+		
+	def appendDataloggerTextBox(self, text):
+		verScrollBar = self.dataloggerTextResponse.verticalScrollBar()
+		horScrollBar = self.dataloggerTextResponse.horizontalScrollBar()
+		scrollIsAtEnd = verScrollBar.maximum() - verScrollBar.value() <= 10
+		
+		self.dataloggerTextResponse.append(text)
+		
+		if scrollIsAtEnd:
+			verScrollBar.setValue(verScrollBar.maximum()) # Scrolls to the bottom
+			horScrollBar.setValue(0) # scroll to the left
+		
+	def openDatalogger(self):
+		# assume there is no connection to datalogger board
+		if self.datalogger_connect_btn.text() == "Open connection":
+			IP = self.datalogger_ip.text()
+			PORT = int(self.datalogger_port.text())
+			self.datalogger = logerino.Logerino(IP, PORT)
+			if self.offline == True:
+				log.debug("Emulating connection to datalogger")
+				self.datalogger_connect_btn.setText("Close connection")
+			else:
+				log.debug("Trying to connect @ " + IP)
+				status = self.datalogger.connect()   # try to connect
+				if status == 1:
+					self.datalogger_connect_btn.setText("Close connection")
+					log.debug("Connected to datalogger succesfully")
+					if self.offline == False:
+						log.debug("Getting board info")
+						log.debug("Returned: " + self.datalogger.identify())  # get board info
+					return
+				elif status == 0:
+					log.error("Could not communicate with datalogger @ %s:%d" % (IP, PORT))
+				elif status == -1:
+					log.error("No device @ %s:%d" % (IP, PORT))
+				else:
+					log.error("Unkonwn error code %d returned from datalogger" % (status))
+				
+			self.datalogger_connect_btn.setText("Open connection")
+			return
+			
+		# assume there is connection to datalogger board
+		if self.datalogger_connect_btn.text() == "Close connection":
+			if self.offline == False:
+				self.datalogger.close()
+			self.datalogger_connect_btn.setText("Open connection")
 						
+	def setDataloggerSampleRate(self):
+		sps = float(self.datalogger_sps.currentText())
+		if self.offline:
+			log.debug("Will emulate setting of sample rate to %f sps" % (sps))
+		else:
+			spsCode = decodeSPS[sps]
+			msg = "Will set sample rate to %f sps (code: %d)" % (sps, spsCode)
+			log.debug(msg)
+			self.appendDataloggerTextBox(msg)
+			retVal = self.datalogger.setSamplingRate(spsCode)
+			if retVal != 1:
+				msg = "Setting sample rate %f failed! (code %d) " % (sps, retVal)
+			else:
+				msg = "Setting sample rate %f OK! (code %d) " % (sps, retVal)
+			log.debug(msg)
+			self.appendDataloggerTextBox(msg)
+
+			
+	def enableDataloggerChannel(self, chNo, state = True):
+		self.dataloggerChannelsEnabled[chNo] = state
+		if state:
+			if self.offline:
+				log.debug("Emulating enable of CH%d" % (chNo))
+			else:
+				current = self.dataloggerChannelCurrent[chNo]
+				ratio = self.dataloggerChannelRatioMes[chNo]
+				msg = "Enabling CH%d (current=%d, ratio=%d)" % (chNo, current, ratio)
+				log.debug(msg)
+				self.appendDataloggerTextBox(msg)
+				retVal = self.datalogger.channelEnable(chNo, decodeCurrent[current], decodeRatio[ratio])
+				if retVal != 1:
+					msg = "Enabling  CH%d failed! (code %d) " % (chNo, retVal)
+					self.dataloggerChanelEnableCheckBoxes[chNo].setChecked(False)
+				else:
+					msg = "Enabling  CH%d OK! (code %d) " % (chNo, retVal)
+				log.debug(msg)
+				self.appendDataloggerTextBox(msg)
+		else:
+			if self.offline:
+				log.debug("Emulating disabling of CH%d" % (chNo))
+			else:
+				msg = "Disabling CH%d" % (chNo)
+				log.debug(msg)
+				self.appendDataloggerTextBox(msg)
+				retVal = self.datalogger.channelDisable(chNo)
+				if retVal != 1:
+					msg = "Disabling  CH%d failed! (code %d) " % (chNo, retVal)
+					self.dataloggerChanelEnableCheckBoxes[chNo].setChecked(True)
+				else:
+					msg = "Disabling  CH%d OK! (code %d) " % (chNo, retVal)
+				log.debug(msg)
+				self.appendDataloggerTextBox(msg)
+			
+	def dataloggerChannelCheckBoxHandler(self, checkBox):
+		state = checkBox.isChecked()
+		# get chNo from checkbox name, e.g. datalogger_ch0_enabled
+		chNo = int(checkBox.objectName().split('_')[1].replace("ch",""))
+		self.enableDataloggerChannel(chNo, state)
+		self.saveQCheckBox(checkBox)
+				
+	def checkDataloggerRatiometricMode(self, checkBox):
+		state = checkBox.isChecked()
+		# get chNo from checkbox name, e.g. datalogger_ch0_ratio
+		chNo = int(checkBox.objectName().split('_')[1].replace("ch",""))
+		log.debug("Ratio mode for CH%d is %d" % (chNo, state))
+		self.dataloggerChannelRatioMes[chNo] = state
+		if self.dataloggerChannelsEnabled[chNo]:
+			self.enableDataloggerChannel(chNo)
+		self.saveQCheckBox(checkBox)
+	
+	def checkDataloggerChannelCurrent(self, comboBox):
+		try:
+			value = float(comboBox.currentText())
+		except:
+			value = 0
+		# get chNo from comboBox name, e.g. datalogger_ch0_current
+		chNo = int(comboBox.objectName().split('_')[1].replace("ch",""))
+		log.debug("Ratio current for CH%d is %f" % (chNo, value))
+		self.dataloggerChannelCurrent[chNo] = value
+		if self.dataloggerChannelsEnabled[chNo]:
+			self.enableDataloggerChannel(chNo)
+		self.saveQComboBox(comboBox)
+		
+	def startSampling(self):
+		if self.datalogger_start_btn.text() == "Start sampling":
+			self.samplingThread = threading.Thread(target=self._samplingThread)
+			self.samplingThread.daemon = True
+			self.datalogger_start_btn.setText("Stop sampling")
+			self.samplingThread.start()
+			log.debug("Online sampling thread launched")
+		else:
+			try:
+				self.samplingThread.join()
+			except Exception as e:
+				log.warning(str(e))
+			log.debug("Online sampling thread stopped")
+			self.datalogger_start_btn.setText("Start sampling")
+			
+	def _samplingThread(self):
+		while self.datalogger_start_btn.text() == "Stop sampling":
+			try:
+				retVal = self.datalogger.samplingStart()               
+				if retVal:
+					time.sleep(self.datalogger_samplingTime.value())
+					data = self.datalogger.getChannelsData()
+					timeCol = np.array(data[1])
+					ch0Col = np.array(self.datalogger.valToVoltage(data[0][0]))
+					a = np.column_stack((timeCol, ch0Col))
+					with open("csv/test.csv", "a") as f:
+						np.savetxt(f, a, delimiter=",")
+				else:
+					log.error("Cant sample data")
+				
+				#self.datalogger.close()
+				#self.openDatalogger()
+			except Exception as e:
+					print(data)
+					log.error(str(e))
+					self.datalogger_connect_btn.setText("Open connection")
+					self.datalogger.close() 
+					self.openDatalogger()
+					self.datalogger_start_btn.setText("Start sampling")
+			
+		
 	def quit(self):
+		try:
+			self.datalogger.close()
+			datalogger_connect_btn.setText("Open connection")
+		except:
+			pass
 		sys.exit(0)
 
 if __name__ == "__main__":
@@ -363,6 +649,8 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-v', '--verbosity', action="count", 
                         help="-v: WARNING, -vv: INFO, -vvv: DEBUG")
+	parser.add_argument("-o", "--offline", action="store_true", default=False, 
+						help="specify if exclude network communication")
 	args = parser.parse_args()
 	
 	#setup verbosity level
@@ -378,6 +666,6 @@ if __name__ == "__main__":
 
 	log.getLogger('matplotlib.font_manager').disabled = True
 	app = QtWidgets.QApplication(sys.argv)
-	window = MyApp()
+	window = MyApp(offline = args.offline)
 	window.show()
 	sys.exit(app.exec_())

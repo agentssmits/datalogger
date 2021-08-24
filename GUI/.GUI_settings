@@ -11,22 +11,31 @@ channel%203=true
 
 [settings]
 rootSelEdit=C:\\Users\\arturs\\Desktop\\datalogger\\GUI
-lineEdit_2=
+lineEdit_2=xhgkh
 lineEdit_3=
-customTabCount=5
+customTabCount=3
 spinBox=191
+datalogger_samplingTime=1
+datalogger_ch0_ratio=false
+datalogger_ch1_ratio=false
+datalogger_ch1_enabled=true
+datalogger_ch0_enabled=true
+datalogger_ch2_enabled=false
+datalogger_ch0_current=8
+datalogger_ch1_current=3
+datalogger_ch2_current=0
 
 [tab_names]
 tab6=Group5
-tab2=Group1
-tab3=Group2
+tab2=Temp
+tab3=gdg
 tab4=Group3
 
 [custom_tab_0_selection]
-channel%200=false
+channel%200=true
 channel%201=false
 channel%203=false
-channel%202=false
+channel%202=true
 
 [custom_tab_2_selection]
 channel%202=false

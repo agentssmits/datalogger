@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1181</width>
+    <width>1191</width>
     <height>936</height>
    </rect>
   </property>
@@ -37,7 +37,7 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+    <item row="0" column="1">
      <widget class="QTabWidget" name="tabWidget">
       <property name="toolTipDuration">
        <number>-6</number>
@@ -962,11 +962,38 @@
          <rect>
           <x>30</x>
           <y>30</y>
-          <width>561</width>
-          <height>311</height>
+          <width>551</width>
+          <height>171</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item alignment="Qt::AlignHCenter">
+          <widget class="QLabel" name="label_17">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="text">
+            <string>General</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
@@ -999,20 +1026,6 @@
            </item>
            <item>
             <widget class="QLineEdit" name="lineEdit_2"/>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_6">
-           <item>
-            <widget class="QLabel" name="label_17">
-             <property name="text">
-              <string>Header names</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="lineEdit_3"/>
            </item>
           </layout>
          </item>
@@ -1075,12 +1088,159 @@
            </item>
           </layout>
          </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="verticalLayoutWidget_2">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>230</y>
+          <width>1107</width>
+          <height>354</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item alignment="Qt::AlignHCenter">
+          <widget class="QLabel" name="label_20">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="text">
+            <string>DataLogger</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_11">
+           <item>
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string>IP address</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_25">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>79</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="datalogger_ip">
+             <property name="text">
+              <string>10.0.4.189</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_26">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="datalogger_start_btn">
+             <property name="text">
+              <string>Start sampling</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="datalogger_connect_btn">
+             <property name="text">
+              <string>Open connection</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_12">
+           <item>
+            <widget class="QLabel" name="label_24">
+             <property name="text">
+              <string>Port</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_27">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>115</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="datalogger_port">
+             <property name="text">
+              <string>1010</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_28">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_7">
            <item>
             <widget class="QLabel" name="label_18">
              <property name="text">
-              <string>Sample rate, ms </string>
+              <string>Samples per second</string>
              </property>
             </widget>
            </item>
@@ -1094,35 +1254,87 @@
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>40</width>
+               <width>24</width>
                <height>20</height>
               </size>
              </property>
             </spacer>
            </item>
            <item>
-            <widget class="QSpinBox" name="spinBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <widget class="QComboBox" name="datalogger_sps">
+             <property name="maxVisibleItems">
+              <number>20</number>
              </property>
-             <property name="minimumSize">
-              <size>
-               <width>55</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>5000</number>
-             </property>
-             <property name="value">
-              <number>200</number>
-             </property>
+             <item>
+              <property name="text">
+               <string>2.5</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>5</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>16.6</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>20</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>60</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>200</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>400</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>800</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>4000</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item>
@@ -1140,6 +1352,1205 @@
            </item>
           </layout>
          </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_13">
+           <item>
+            <widget class="QLabel" name="label_40">
+             <property name="text">
+              <string>Sampling time, s</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_29">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>43</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="datalogger_samplingTime">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>600</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_30">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="gridLayout_7">
+           <item row="2" column="6" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch4_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="9" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch7_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="13" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch11_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="10" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch8_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="13" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_36">
+             <property name="text">
+              <string>CH11</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="7" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch5_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="8" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch6_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="7" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch5_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="5" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch3_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch2_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="11" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch9_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="10" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch8_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="12" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch10_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLabel" name="label_39">
+             <property name="text">
+              <string>Channel current</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch1_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="6" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch4_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_27">
+             <property name="text">
+              <string>CH2</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="13" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch11_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_26">
+             <property name="text">
+              <string>CH1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLabel" name="label_38">
+             <property name="text">
+              <string>Ratiometric enable</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="label_37">
+             <property name="text">
+              <string>Channel enable</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="11" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch9_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="8" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_31">
+             <property name="text">
+              <string>CH6</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="6" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_29">
+             <property name="text">
+              <string>CH4</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="12" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch10_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="11" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_34">
+             <property name="text">
+              <string>CH9</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="9" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_32">
+             <property name="text">
+              <string>CH7</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="5" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_28">
+             <property name="text">
+              <string>CH3</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="8" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch6_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="12" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_35">
+             <property name="text">
+              <string>CH10</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="10" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_33">
+             <property name="text">
+              <string>CH8</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="7" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_30">
+             <property name="text">
+              <string>CH5</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="5">
+            <widget class="QComboBox" name="datalogger_ch3_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QComboBox" name="datalogger_ch0_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="4">
+            <widget class="QComboBox" name="datalogger_ch2_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="7">
+            <widget class="QComboBox" name="datalogger_ch5_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="10">
+            <widget class="QComboBox" name="datalogger_ch8_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="0" column="2" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_25">
+             <property name="text">
+              <string>CH0</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="QComboBox" name="datalogger_ch1_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="6">
+            <widget class="QComboBox" name="datalogger_ch4_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="8">
+            <widget class="QComboBox" name="datalogger_ch6_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="13">
+            <widget class="QComboBox" name="datalogger_ch11_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="9">
+            <widget class="QComboBox" name="datalogger_ch7_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="1" column="2" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch0_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="12">
+            <widget class="QComboBox" name="datalogger_ch10_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="11">
+            <widget class="QComboBox" name="datalogger_ch9_current">
+             <item>
+              <property name="text">
+               <string>OFF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="3" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch1_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="4" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch2_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="9" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch7_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch0_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="5" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="datalogger_ch3_ratio">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QTextBrowser" name="dataloggerTextResponse"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="verticalLayoutWidget_3">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>600</y>
+          <width>921</width>
+          <height>168</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item alignment="Qt::AlignHCenter">
+          <widget class="QLabel" name="label_41">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="text">
+            <string>Relay board</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="12" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_55">
+             <property name="text">
+              <string>R10</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="10" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_57">
+             <property name="text">
+              <string>R8</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="11" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_56">
+             <property name="text">
+              <string>R9</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r0_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_58">
+             <property name="text">
+              <string>R0</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="13" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_59">
+             <property name="text">
+              <string>R11</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="9" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r7_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="13" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r11_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="10" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r8_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="11" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r9_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="7" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r5_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="5" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r3_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r2_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="8" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r6_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="12" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r10_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r1_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="6" alignment="Qt::AlignHCenter">
+            <widget class="QCheckBox" name="relay_r4_enabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="label_47">
+             <property name="text">
+              <string>Relay enable</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="5" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_50">
+             <property name="text">
+              <string>R3</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_48">
+             <property name="text">
+              <string>R1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_49">
+             <property name="text">
+              <string>R2</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="6" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_51">
+             <property name="text">
+              <string>R4</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="8" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_52">
+             <property name="text">
+              <string>R6</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="9" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_54">
+             <property name="text">
+              <string>R7</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="7" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_53">
+             <property name="text">
+              <string>R5</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QTextBrowser" name="textBrowser_2"/>
+         </item>
         </layout>
        </widget>
       </widget>
@@ -1152,7 +2563,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1181</width>
+     <width>1191</width>
      <height>26</height>
     </rect>
    </property>
